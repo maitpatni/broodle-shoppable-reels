@@ -1,59 +1,78 @@
 === Broodle Shoppable Reels ===
 Contributors: Broodle
-Tags: reels, video reels, product reels, shoppable videos, ecommerce
-Requires at least: 4.6
+Tags: reels, video reels, shoppable videos, woocommerce, product videos
+Requires at least: 5.0
 Tested up to: 6.7.1
 Stable tag: 1.2
+Requires PHP: 7.4
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Add interactive, shoppable videos and reels to your WordPress site with seamless mobile experience.
+Add interactive, shoppable video reels to your WooCommerce store. Let customers browse and buy products directly from engaging short-form video content.
 
 == Description ==
-Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience. Features mobile-optimized popup layouts, customizable carousel display, and integrated WooCommerce product functionality.
+
+Broodle Shoppable Reels brings short-form video commerce to your WooCommerce store. Create video reels, attach products, and let customers shop directly from the video — all within a responsive, mobile-friendly interface.
+
+**Key Features:**
+
+* Shoppable video reels with WooCommerce product integration
+* Responsive Slick-powered carousel (3 slides desktop, 2 mobile)
+* Three popup layout options: Reel + Product, Reel only, Product only
+* Automatic reel display on single product pages with floating video widget
+* Lazy video loading with configurable background image and spinner
+* Related products shown inside the popup modal
+* Dedicated Reels Categories taxonomy for organizing content
+* Auto-updates from private GitHub repository
 
 == Installation ==
-1. Upload the `broodle-shoppable-reels` folder to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Use the shortcode `[broodle_reel_slider]` in your posts or pages to display the reels.
-4. Configure settings under 'Broodle Reels' in your WordPress admin menu.
 
-== Features ==
-* Mobile-responsive video reels
-* Product integration with WooCommerce
-* Customizable popup layouts
-* Touch-friendly mobile interface
-* Video carousel with product details
-* Direct add-to-cart functionality
+1. Upload the `broodle-shoppable-reels` folder to `/wp-content/plugins/`.
+2. Activate the plugin through the **Plugins** menu in WordPress.
+3. WooCommerce must be active. The plugin will deactivate with a notice if WooCommerce is missing.
+4. Go to **Shoppable Reels → Add New** to create your first reel.
+5. Use the shortcode `[broodle_reel_slider]` to display reels on any page or post.
 
-== Screenshots ==
+**Auto-Updates Setup:**
 
-1. ![Screenshot 1](screenshot-1.png)
-   Frontend Short Code Screenshot.
+To receive automatic updates from the private GitHub repository, add this to your `wp-config.php`:
 
-2. ![Screenshot 2](screenshot-2.png)
-   Frontend Single Product Page Screenshot.
-
-3. ![Screenshot 3](screenshot-3.png)
-   Backend Post Type Reels Listing Screenshot.
-
-4. ![Screenshot 4](screenshot-4.png)
-   Backend Single Product Right Video Select Setting Screenshot.
-
-5. ![Screenshot 5](screenshot-5.png)
-   Backend Reels Plugin Setting Screenshot.
+`define( 'BROODLE_SR_GITHUB_TOKEN', 'your-github-personal-access-token' );`
 
 == Frequently Asked Questions ==
 
-= How do I use the reels? =
+= How do I display reels on a page? =
 
-Simply insert the shortcode `[broodle_reel_slider]` into your posts or pages where you want the reels to appear.
-Retrieve Reels by ID using this shortcode: [broodle_reel_slider 1,2,3,4,5]
+Use the shortcode `[broodle_reel_slider]` to show all reels with "Show in Home Slider" enabled. To show specific reels by ID: `[broodle_reel_slider 12,34,56]`.
+
+= How do I add a video to a product page? =
+
+Edit any WooCommerce product, scroll to the **Shoppable Reels Layout** meta box, upload a video in the **Right Video** field, and save. A floating video widget will appear on that product page.
+
+= What popup layouts are available? =
+
+Three options configurable from **Shoppable Reels → Settings**: Reels And Product (side by side), Reels only, or Product only.
+
+= Does this plugin work without WooCommerce? =
+
+No. WooCommerce is required. The plugin will deactivate itself if WooCommerce is not active.
+
+= How do I set a custom loading background? =
+
+Go to **Shoppable Reels → Settings** and use the **Loading Background Image** field to upload or select an image. This image displays while reel videos are loading. Leave it empty for a plain dark background.
 
 == Changelog ==
 
 = 1.2 =
-* Rebranded to Broodle Shoppable Reels
+* Added configurable loading background image setting
+* Added lazy video loading with spinner animation
+* Added null safety checks throughout AJAX handlers
+* Added floating video widget and fullscreen modal on product pages
+* Improved mobile responsive layout and font sizing
+* Three configurable popup layout options
+* Related products support in popup modal
+* Reels Categories taxonomy for content organization
+* Auto-update support from private GitHub repository
 
 = 1.0 =
 * Initial release
@@ -61,27 +80,12 @@ Retrieve Reels by ID using this shortcode: [broodle_reel_slider 1,2,3,4,5]
 == Upgrade Notice ==
 
 = 1.2 =
-Rebranded to Broodle Shoppable Reels
+Major update with configurable loading backgrounds, lazy video loading, improved mobile experience, and auto-update support.
 
 == Privacy Policy ==
-This plugin does not collect any personal data.
 
-== Credits ==
-
-This plugin is developed by Broodle.
+This plugin does not collect or store any personal data.
 
 == Support ==
 
-For support, please visit [Broodle Marketplace](https://broodle.one/marketplace).
-
-== Plugin URI ==
-
-[Plugin Homepage](https://broodle.one/marketplace)
-
-== Author ==
-
-[Broodle](https://broodle.one/)
-
-== License ==
-
-Licensed under the GNU General Public License v2.0, see [License URI](https://www.gnu.org/licenses/gpl-2.0.html)
+For support, visit [Broodle Marketplace](https://broodle.one/marketplace).

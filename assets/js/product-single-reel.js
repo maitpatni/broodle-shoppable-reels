@@ -86,50 +86,60 @@ if (pausePlayButton && video) {
 
 // Reference to the video close button
 var videoClose = document.querySelector('.video-close');
-videoClose.addEventListener('click', function () {
-    video.pause(); // Pause the video
-    document.querySelector('#draggableDiv').style.display = 'none'; // Hide the draggable div
-});
+if (videoClose) {
+    videoClose.addEventListener('click', function () {
+        if (video) video.pause();
+        var dd = document.querySelector('#draggableDiv');
+        if (dd) dd.style.display = 'none';
+    });
+}
 
 // Reference to the modal and draggable div
 var VideoModal = document.querySelector('#VideoModal');
 var draggableDiv = document.querySelector('#draggableDiv');
 
-// Handle click event on the draggable div
-draggableDiv.querySelector('.videoBox').addEventListener('click', function () {
-    VideoModal.style.display = 'block'; // Show the modal
-    VideoModal.classList.add('show'); // Add 'show' class for modal
-    const modalVideo = VideoModal.querySelector('.video'); // Get the video element inside the modal
-    if (modalVideo) {
-        modalVideo.play(); // Play the video inside the modal
-    }
-    draggableDiv.style.display = 'none'; // Hide the draggable div
-});
-
-// Handle volume toggle button
-VideoModal.querySelector('.volume_btn').addEventListener('click', function () {
-    const modalVideo = VideoModal.querySelector('.video'); // Get the video element inside the modal
-    if (modalVideo) {
-        modalVideo.muted = !modalVideo.muted; // Toggle mute state
-        if (modalVideo.muted) {
-            this.classList.add('muted'); // Add 'muted' class
-        } else {
-            this.classList.remove('muted'); // Remove 'muted' class
-        }
-    }
-});
-
-// Handle close button inside the modal
-VideoModal.querySelector('.close-btn_mobile').addEventListener('click', function () {
-    
-    VideoModal.style.display = 'none'; // Hide the modal
-    VideoModal.classList.remove('show'); // Remove 'show' class
-    const modalVideo = VideoModal.querySelector('.video'); // Get the video element inside the modal
-    if (modalVideo) {
-        modalVideo.pause(); // Pause the video
-        modalVideo.muted = false; // Unmute the video
+if (draggableDiv && VideoModal) {
+    // Handle click event on the draggable div
+    var videoBox = draggableDiv.querySelector('.videoBox');
+    if (videoBox) {
+        videoBox.addEventListener('click', function () {
+            VideoModal.style.display = 'block';
+            VideoModal.classList.add('show');
+            var modalVideo = VideoModal.querySelector('.video');
+            if (modalVideo) modalVideo.play();
+            draggableDiv.style.display = 'none';
+        });
     }
 
-    draggableDiv.style.display = 'block'; // Show the draggable div
-    video.play(); // Play the main video (optional)
-});
+    // Handle volume toggle button
+    var volumeBtn = VideoModal.querySelector('.volume_btn');
+    if (volumeBtn) {
+        volumeBtn.addEventListener('click', function () {
+            var modalVideo = VideoModal.querySelector('.video');
+            if (modalVideo) {
+                modalVideo.muted = !modalVideo.muted;
+                if (modalVideo.muted) {
+                    this.classList.add('muted');
+                } else {
+                    this.classList.remove('muted');
+                }
+            }
+        });
+    }
+
+    // Handle close button inside the modal
+    var closeBtn = VideoModal.querySelector('.close-btn_mobile');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+            VideoModal.style.display = 'none';
+            VideoModal.classList.remove('show');
+            var modalVideo = VideoModal.querySelector('.video');
+            if (modalVideo) {
+                modalVideo.pause();
+                modalVideo.muted = false;
+            }
+            draggableDiv.style.display = 'block';
+            if (video) video.play();
+        });
+    }
+}

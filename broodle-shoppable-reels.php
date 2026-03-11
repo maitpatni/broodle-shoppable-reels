@@ -73,7 +73,7 @@ if(!function_exists('broodle_sr_display_activation_notice')){
 	// Function to display a notice when WooCommerce is not active
 	function broodle_sr_display_activation_notice() {
 		$class = 'notice notice-error is-dismissible';
-		$message = __('Broodle Shoppable Reels requires WooCommerce to be active. ', 'broodle-shoppable-reels');
+		$message = __('Shoppable Reels requires WooCommerce to be active. ', 'broodle-shoppable-reels');
 
 		printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
 		wp_add_inline_script('broodle-sr-admin-fallback', 'setTimeout(function() { window.location.reload(true); }, 100);');
@@ -94,7 +94,7 @@ if(!function_exists('broodle_sr_check_woocommerce_on_admin_pages')){
 	// Function to check WooCommerce status on admin pages and display an alert if WooCommerce is uninstalled
 	function broodle_sr_check_woocommerce_on_admin_pages() {
 		if (!broodle_sr_woocommerce_active()) {
-			wp_add_inline_script('broodle-sr-admin-fallback', 'alert("Broodle Shoppable Reels requires WooCommerce to be active.");');
+			wp_add_inline_script('broodle-sr-admin-fallback', 'alert("Shoppable Reels requires WooCommerce to be active.");');
 		}
 	}
 	// Check WooCommerce status on admin pages
@@ -120,6 +120,10 @@ if ( ! function_exists( 'broodle_sr_set_default_settings' ) ) {
 
         if ( get_option( 'product_page_video' ) === false ) {
             update_option( 'product_page_video', 1 );
+        }
+
+        if ( get_option( 'broodle_sr_loading_bg_image' ) === false ) {
+            update_option( 'broodle_sr_loading_bg_image', '' );
         }
     }
 }
@@ -241,9 +245,25 @@ function broodle_sr_enqueue_assets() {
         'broodle_sr_ajax', 
         array(
 			'ajax_url' => admin_url('admin-ajax.php'),
-			'nonce' => wp_create_nonce('broodle_sr_nonce')
+			'nonce' => wp_create_nonce('broodle_sr_nonce'),
+			'loading_bg_image' => esc_url( get_option( 'broodle_sr_loading_bg_image', '' ) )
 		)
     );
+
+	// Output dynamic loading background CSS
+	$loading_bg_image = get_option( 'broodle_sr_loading_bg_image', '' );
+	if ( ! empty( $loading_bg_image ) ) {
+		$loading_bg_css = '
+			.reel-video-container,
+			.videoDiv.reel-video-container,
+			.reelUpSlider .reel-video-container,
+			.singlePagereelUpSlider .reel-video-container {
+				background: #1a1a1a url(' . esc_url( $loading_bg_image ) . ') center center !important;
+				background-size: cover !important;
+			}
+		';
+		wp_add_inline_style( 'broodle-sr', $loading_bg_css );
+	}
 }
 
 // Hook into WordPress to load assets
@@ -290,15 +310,15 @@ if(!function_exists('broodle_sr_custom_post_type_reels')) {
 		// Set UI labels for Custom Post Type
 		$labels = array(
 			'name'                => _x( 'Reels', 'Post Type General Name', 'broodle-shoppable-reels' ),
-			'singular_name'       => _x( 'Reels', 'Post Type Singular Name', 'broodle-shoppable-reels' ),
-			'menu_name'           => __( 'Broodle Reels', 'broodle-shoppable-reels' ),
-			'parent_item_colon'   => __( 'Parent Reels', 'broodle-shoppable-reels' ),
+			'singular_name'       => _x( 'Reel', 'Post Type Singular Name', 'broodle-shoppable-reels' ),
+			'menu_name'           => __( 'Shoppable Reels', 'broodle-shoppable-reels' ),
+			'parent_item_colon'   => __( 'Parent Reel', 'broodle-shoppable-reels' ),
 			'all_items'           => __( 'All Reels', 'broodle-shoppable-reels' ),
-			'view_item'           => __( 'View Reels', 'broodle-shoppable-reels' ),
-			'add_new_item'        => __( 'Add New Reels', 'broodle-shoppable-reels' ),
+			'view_item'           => __( 'View Reel', 'broodle-shoppable-reels' ),
+			'add_new_item'        => __( 'Add New Reel', 'broodle-shoppable-reels' ),
 			'add_new'             => __( 'Add New', 'broodle-shoppable-reels' ),
-			'edit_item'           => __( 'Edit Reels', 'broodle-shoppable-reels' ),
-			'update_item'         => __( 'Update Reels', 'broodle-shoppable-reels' ),
+			'edit_item'           => __( 'Edit Reel', 'broodle-shoppable-reels' ),
+			'update_item'         => __( 'Update Reel', 'broodle-shoppable-reels' ),
 			'search_items'        => __( 'Search Reels', 'broodle-shoppable-reels' ),
 			'not_found'           => __( 'Not Found', 'broodle-shoppable-reels' ),
 			'not_found_in_trash'  => __( 'Not found in Trash', 'broodle-shoppable-reels' ),
@@ -330,17 +350,17 @@ if(!function_exists('broodle_sr_custom_post_type_reels')) {
 		register_post_type( 'broodle_sr_reels', $args );
 		
 		$labels = array(
-			'name' => _x( 'Reels Cat', 'taxonomy general name', 'broodle-shoppable-reels' ),
-			'singular_name' => _x( 'Reels Cat', 'taxonomy singular name', 'broodle-shoppable-reels' ),
-			'search_items' =>  __( 'Reels Cat', 'broodle-shoppable-reels' ),
-			'all_items' => __( 'All Reels Cat', 'broodle-shoppable-reels' ),
-			'parent_item' => __( 'Parent Reels Cat', 'broodle-shoppable-reels' ),
-			'parent_item_colon' => __( 'Parent Reels Cat:', 'broodle-shoppable-reels' ),
-			'edit_item' => __( 'Edit Reels Cat', 'broodle-shoppable-reels' ), 
-			'update_item' => __( 'Update Reels Cat', 'broodle-shoppable-reels' ),
-			'add_new_item' => __( 'Add New Reels Cat', 'broodle-shoppable-reels' ),
-			'new_item_name' => __( 'New Reels Name', 'broodle-shoppable-reels' ),
-			'menu_name' => __( 'Reels Cat', 'broodle-shoppable-reels' ),
+			'name' => _x( 'Reels Categories', 'taxonomy general name', 'broodle-shoppable-reels' ),
+			'singular_name' => _x( 'Reels Category', 'taxonomy singular name', 'broodle-shoppable-reels' ),
+			'search_items' =>  __( 'Search Categories', 'broodle-shoppable-reels' ),
+			'all_items' => __( 'All Categories', 'broodle-shoppable-reels' ),
+			'parent_item' => __( 'Parent Category', 'broodle-shoppable-reels' ),
+			'parent_item_colon' => __( 'Parent Category:', 'broodle-shoppable-reels' ),
+			'edit_item' => __( 'Edit Category', 'broodle-shoppable-reels' ), 
+			'update_item' => __( 'Update Category', 'broodle-shoppable-reels' ),
+			'add_new_item' => __( 'Add New Category', 'broodle-shoppable-reels' ),
+			'new_item_name' => __( 'New Category Name', 'broodle-shoppable-reels' ),
+			'menu_name' => __( 'Categories', 'broodle-shoppable-reels' ),
 		);
 						
 		// Now register the taxonomy
@@ -399,7 +419,7 @@ if(!function_exists('broodle_sr_wporg_add_custom_box')){
 		foreach ($screens as $screen) {
 			add_meta_box(
 				'broodle_sr_box_id1',
-				'Broodle Reels Layout',
+				'Shoppable Reels Layout',
 				'broodle_sr_wporg_custom_box_html1',
 				$screen,
 				'normal',
@@ -411,7 +431,7 @@ if(!function_exists('broodle_sr_wporg_add_custom_box')){
 		foreach ($screens as $screen) {
 			add_meta_box(
 				'broodle_sr_box_id2',
-				'Broodle Reels Layout',
+				'Shoppable Reels Layout',
 				'broodle_sr_wporg_custom_box_html2',
 				$screen,
 				'normal',
@@ -466,7 +486,7 @@ if(!function_exists('broodle_sr_wporg_add_custom_box')){
 				$currentReelProduct =  get_post_meta($post->ID, 'reelSliderProduct', true);
 
 				$products_data = get_post_meta($post->ID, 'productsData', true);
-				$CurrentReelRelatedproducts = unserialize($products_data);
+				$CurrentReelRelatedproducts = maybe_unserialize($products_data);
 			?>
 			
 			<span id="pluginsPath" style="display:none;"><?php echo esc_attr( BROODLE_SR_PLUGIN_URL ); ?></span>
@@ -1029,6 +1049,11 @@ if(!function_exists('broodle_sr_create_user_form_ajax')){
 
 		$product = wc_get_product($product_id);
 
+		if ( ! $product || ! $product->exists() ) {
+			wp_send_json_error( [ 'message' => 'Product not found' ] );
+			wp_die();
+		}
+
 		// Get price information
 		$regular_price = $product->get_regular_price();
 		$sale_price = $product->get_sale_price();
@@ -1076,22 +1101,27 @@ if(!function_exists('broodle_sr_create_user_form_ajax')){
 		$result_reels = new WP_Query( $args_reel );	
 		$related_product_arr = [];
 		$getProductDataByReelId = get_post_meta( $reel_id, 'productsData', true );
-		$getProductDataByReelId_decode = unserialize($getProductDataByReelId);
+		$getProductDataByReelId_decode = maybe_unserialize( $getProductDataByReelId );
 		
-		foreach ($getProductDataByReelId_decode as $key => $productId) {
-			$productData = wc_get_product($productId);
-			if($result_reels->have_posts()){
-					$get_the_reelProductID = get_post_meta( get_the_ID(), "reelSliderProduct", true);
-					if($productId != $get_the_reelProductID  || $productId != $product_id  ){
-						$related_product_arr[] = [
-							"product_id" =>$productId,
-							"reel_id"=> get_the_ID(),
-							"product_image_url" => wp_get_attachment_url($productData->get_image_id()),
-							"product_name" => $productData->get_name(),
-							"selling_price" => $productData->get_price(),
-							"original_price" => $productData->get_regular_price(),	
-						];				
-					}	
+		if ( is_array( $getProductDataByReelId_decode ) ) {
+			foreach ($getProductDataByReelId_decode as $key => $productId) {
+				$productData = wc_get_product($productId);
+				if ( ! $productData || ! $productData->exists() ) {
+					continue;
+				}
+				if($result_reels->have_posts()){
+						$get_the_reelProductID = get_post_meta( get_the_ID(), "reelSliderProduct", true);
+						if($productId != $get_the_reelProductID  || $productId != $product_id  ){
+							$related_product_arr[] = [
+								"product_id" =>$productId,
+								"reel_id"=> get_the_ID(),
+								"product_image_url" => wp_get_attachment_url($productData->get_image_id()),
+								"product_name" => $productData->get_name(),
+								"selling_price" => $productData->get_price(),
+								"original_price" => $productData->get_regular_price(),	
+							];				
+						}	
+				}
 			}
 		}
 		$data['related_product'] = $related_product_arr;
@@ -1275,7 +1305,7 @@ if ( ! function_exists( 'broodle_sr_settings_page' ) ) {
 	function broodle_sr_settings_page() {
 		add_submenu_page(
 			'edit.php?post_type=broodle_sr_reels',
-			'Broodle Reels Settings',
+			'Shoppable Reels Settings',
 			'Settings',
 			'manage_options',
 			'broodle-sr-reels-settings',
@@ -1294,7 +1324,7 @@ if ( ! function_exists( 'broodle_sr_settings_page' ) ) {
 		?>
 
 		<div class="wrap broodle-sr-setting">
-			<h1>Broodle Reels Settings</h1>
+			<h1>Shoppable Reels Settings</h1>
 			<form method="post" action="options.php">
 				<?php
 				settings_fields('broodle_sr_reels_settings_group');
@@ -1329,11 +1359,47 @@ if ( ! function_exists( 'broodle_sr_settings_page' ) ) {
 							<label for="product_page_reels">Hide/Show</label>
 						</td>
 			        </tr>
+					<tr valign="top">
+						<th scope="row">Loading Background Image</th>
+						<td>
+							<?php $loading_bg_image = get_option( 'broodle_sr_loading_bg_image', '' ); ?>
+							<input type="text" name="broodle_sr_loading_bg_image" id="broodle_sr_loading_bg_image" value="<?php echo esc_url( $loading_bg_image ); ?>" class="regular-text" placeholder="Enter image URL or use media picker" />
+							<button type="button" class="button broodle-sr-upload-bg" id="broodle_sr_upload_bg_btn">Select Image</button>
+							<?php if ( ! empty( $loading_bg_image ) ) : ?>
+								<br><img src="<?php echo esc_url( $loading_bg_image ); ?>" style="max-width:300px;max-height:150px;margin-top:10px;border-radius:6px;" id="broodle_sr_bg_preview" />
+							<?php else : ?>
+								<br><img src="" style="max-width:300px;max-height:150px;margin-top:10px;border-radius:6px;display:none;" id="broodle_sr_bg_preview" />
+							<?php endif; ?>
+							<p class="description">This image is shown as the background while reel videos are loading. Leave empty for a plain dark background.</p>
+						</td>
+					</tr>
 			    </table>
 				<?php
 				submit_button();
 				?>
 			</form>
+			<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				$('#broodle_sr_upload_bg_btn').on('click', function(e) {
+					e.preventDefault();
+					var mediaUploader = wp.media({
+						title: 'Select Loading Background Image',
+						button: { text: 'Use This Image' },
+						multiple: false,
+						library: { type: 'image' }
+					});
+					mediaUploader.on('select', function() {
+						var attachment = mediaUploader.state().get('selection').first().toJSON();
+						$('#broodle_sr_loading_bg_image').val(attachment.url);
+						$('#broodle_sr_bg_preview').attr('src', attachment.url).show();
+					});
+					mediaUploader.open();
+				});
+			});
+			</script>
+			<?php
+			wp_enqueue_media();
+		?>
 		</div>
 		<?php
 	}
@@ -1345,6 +1411,7 @@ if ( ! function_exists( 'broodle_sr_register_reels_settings' ) ) {
         register_setting( 'broodle_sr_reels_settings_group', 'related_product', 'absint' );
         register_setting( 'broodle_sr_reels_settings_group', 'product_page_reels', 'absint' );
         register_setting( 'broodle_sr_reels_settings_group', 'product_page_video', 'absint' );
+        register_setting( 'broodle_sr_reels_settings_group', 'broodle_sr_loading_bg_image', 'esc_url_raw' );
     }
     add_action('admin_init', 'broodle_sr_register_reels_settings');
 }

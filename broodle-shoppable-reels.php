@@ -28,11 +28,6 @@ $broodle_sr_update_checker = PucFactory::buildUpdateChecker(
 // Set the branch that contains the stable release
 $broodle_sr_update_checker->setBranch('main');
 
-// Authenticate with GitHub token from wp-config.php (define BROODLE_SR_GITHUB_TOKEN there)
-if ( defined( 'BROODLE_SR_GITHUB_TOKEN' ) && BROODLE_SR_GITHUB_TOKEN ) {
-	$broodle_sr_update_checker->setAuthentication( BROODLE_SR_GITHUB_TOKEN );
-}
-
 // Disable plugin repository view details button
 add_filter('plugin_row_meta', 'broodle_sr_disable_view_details', 10, 2);
 function broodle_sr_disable_view_details($plugin_meta, $plugin_file) {

@@ -12,7 +12,7 @@ Add interactive, shoppable video reels to your WooCommerce store. Let customers 
 - **Related Products** — Show related products within the reel popup modal.
 - **Category Support** — Organize reels with a dedicated taxonomy (Reels Categories).
 - **Customizable Loading Background** — Set a custom background image from the plugin settings that displays while videos are loading.
-- **Auto-Updates from GitHub** — Private GitHub repository integration using [Plugin Update Checker](https://github.com/YahnisElsts/plugin-update-checker) for seamless updates.
+- **Auto-Updates from GitHub** — Public GitHub repository integration using [Plugin Update Checker](https://github.com/YahnisElsts/plugin-update-checker) for seamless updates.
 
 ## Requirements
 
@@ -29,18 +29,9 @@ Add interactive, shoppable video reels to your WooCommerce store. Let customers 
 3. Activate the plugin from **Plugins** in your WordPress admin.
 4. WooCommerce must be active — the plugin will deactivate itself with a notice if WooCommerce is missing.
 
-### Auto-Updates (Private Repo)
+### Auto-Updates
 
-The plugin supports automatic updates from its private GitHub repository. To enable:
-
-1. Open your `wp-config.php` file.
-2. Add the following line above the `/* That's all, stop editing! */` comment:
-
-```php
-define( 'BROODLE_SR_GITHUB_TOKEN', 'your-github-personal-access-token' );
-```
-
-3. The plugin will check for new releases on the `main` branch and offer updates through the standard WordPress update flow.
+The plugin automatically checks for updates from its [GitHub repository](https://github.com/maitpatni/broodle-shoppable-reels). When a new version is pushed to the `main` branch, WordPress will show the update in the standard **Dashboard → Updates** screen — no configuration needed.
 
 ## Usage
 

@@ -23,7 +23,7 @@ Broodle Shoppable Reels brings short-form video commerce to your WooCommerce sto
 * Lazy video loading with configurable background image and spinner
 * Related products shown inside the popup modal
 * Dedicated Reels Categories taxonomy for organizing content
-* Auto-updates from private GitHub repository
+* Auto-updates from GitHub repository
 
 == Installation ==
 
@@ -33,11 +33,7 @@ Broodle Shoppable Reels brings short-form video commerce to your WooCommerce sto
 4. Go to **Shoppable Reels → Add New** to create your first reel.
 5. Use the shortcode `[broodle_reel_slider]` to display reels on any page or post.
 
-**Auto-Updates Setup:**
-
-To receive automatic updates from the private GitHub repository, add this to your `wp-config.php`:
-
-`define( 'BROODLE_SR_GITHUB_TOKEN', 'your-github-personal-access-token' );`
+Updates are delivered automatically from the public GitHub repository — no extra configuration needed.
 
 == Frequently Asked Questions ==
 

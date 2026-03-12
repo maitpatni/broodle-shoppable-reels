@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 1.9
+ * Version: 1.9.1
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -911,7 +911,13 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 		
 		<script type="text/javascript">
 		jQuery(document).ready(function($) {
-			/* ── Sequential lazy-loading for reel carousels ── */
+			/* ── Smart preloading lazy-loader for reel carousels ──
+			   • On init: loads slide 0, then 1, then 2 sequentially
+			   • On beforeChange: immediately starts loading the NEXT
+			     slide that is about to scroll into view
+			   • Already-loaded slides are never re-loaded
+			   • Far-away slides are unloaded to save memory
+			*/
 			var loadQueue = [];
 			var isLoading = false;
 
@@ -927,7 +933,6 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 				container.find('.reel-video-placeholder').removeClass('hidden').show();
 			}
 
-			/* Load a single video and return; calls processQueue when done */
 			function loadVideo(container, callback) {
 				var videoSrc = container.attr('data-video-src');
 				if (!videoSrc || container.hasClass('video-loaded')) {
@@ -966,9 +971,7 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 
 				video.addEventListener('canplay', finish);
 				video.addEventListener('playing', function() {
-					video.muted = true;
-					video.volume = 0;
-					video.style.opacity = '1';
+					video.muted = true; video.volume = 0; video.style.opacity = '1';
 				});
 				video.addEventListener('error', function() {
 					container.removeClass('loading');
@@ -984,12 +987,10 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 				video.load();
 			}
 
-			/* Process the queue one video at a time */
 			function processQueue() {
 				if (isLoading || loadQueue.length === 0) return;
 				isLoading = true;
 				var container = loadQueue.shift();
-				/* Skip if already loaded or removed from DOM */
 				if (!container.length || container.hasClass('loaded')) {
 					isLoading = false;
 					processQueue();
@@ -1001,54 +1002,57 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 				});
 			}
 
-			/* Enqueue videos for the visible slides (sequential) */
-			function enqueueVisibleVideos(slider) {
-				var isDesktop = window.innerWidth > 768;
-				var visibleSlides = isDesktop ? 3 : 2;
-				var preloadAhead = 1;
-				var unloadDistance = 4;
-
-				if (!slider.hasClass('slick-initialized')) return;
-
-				var currentSlide = slider.slick('slickCurrentSlide');
-				var totalSlides = slider.find('.slick-slide:not(.slick-cloned)').length;
-				var startSlide = Math.max(0, currentSlide);
-				var endSlide = Math.min(totalSlides - 1, currentSlide + visibleSlides + preloadAhead - 1);
-
-				/* Enqueue visible + preload-ahead slides sequentially */
-				for (var i = startSlide; i <= endSlide; i++) {
-					var slideEl = slider.find('.slick-slide[data-slick-index="' + i + '"]');
-					var vc = slideEl.find('.reel-video-container[data-lazy="true"]:not(.video-loaded)');
-					if (vc.length) {
-						vc.addClass('loading');
-						loadQueue.push(vc);
+			/* Enqueue a single slide index if not already loaded */
+			function enqueueSlide(slider, idx) {
+				var slideEl = slider.find('.slick-slide[data-slick-index="' + idx + '"]');
+				if (!slideEl.length) return;
+				var vc = slideEl.find('.reel-video-container[data-lazy="true"]:not(.video-loaded)');
+				if (vc.length) {
+					vc.addClass('loading');
+					/* Avoid duplicates in queue */
+					var dominated = false;
+					for (var q = 0; q < loadQueue.length; q++) {
+						if (loadQueue[q].is(vc)) { dominated = true; break; }
 					}
+					if (!dominated) loadQueue.push(vc);
 				}
+			}
 
-				/* Unload far-away slides to save memory */
+			function getVisibleCount() {
+				return window.innerWidth > 768 ? 3 : 2;
+			}
+
+			/* Unload slides far from current view */
+			function cleanupFarSlides(slider, currentSlide) {
+				var visible = getVisibleCount();
+				var keepFrom = currentSlide - 2;
+				var keepTo = currentSlide + visible + 2;
 				slider.find('.slick-slide:not(.slick-cloned)').each(function() {
 					var idx = parseInt($(this).attr('data-slick-index'), 10);
 					if (isNaN(idx)) return;
-					if (idx < currentSlide - unloadDistance || idx > endSlide + unloadDistance) {
+					if (idx < keepFrom || idx > keepTo) {
 						var vc = $(this).find('.reel-video-container.video-loaded');
 						if (vc.length) unloadVideo(vc);
 					}
 				});
-
-				processQueue();
 			}
 
-			/* Initial load — start as soon as slick is ready */
+			/* Initial load: enqueue slides 0, 1, 2 (or 0, 1 on mobile) sequentially */
 			function initSliderVideos() {
 				$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
 					var slider = $(this);
-					if (slider.hasClass('slick-initialized')) {
-						enqueueVisibleVideos(slider);
+					if (!slider.hasClass('slick-initialized')) return;
+					var visible = getVisibleCount();
+					var total = slider.find('.slick-slide:not(.slick-cloned)').length;
+					/* Enqueue visible slides + 1 ahead */
+					for (var i = 0; i < Math.min(visible + 1, total); i++) {
+						enqueueSlide(slider, i);
 					}
+					processQueue();
 				});
 			}
 
-			/* Fire immediately if slick is already initialized, otherwise poll briefly */
+			/* Poll for slick init then start */
 			var initAttempts = 0;
 			function tryInit() {
 				var anyInit = false;
@@ -1064,24 +1068,45 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 			}
 			tryInit();
 
-			/* On slide change — enqueue next batch */
-			$(document).on('afterChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick) {
+			/* BEFORE slide changes — preload the slide about to enter view */
+			$(document).on('beforeChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide, nextSlide) {
 				var slider = $(this);
-				/* Clear any pending queue items from previous position */
-				loadQueue = [];
-				requestAnimationFrame(function() {
-					enqueueVisibleVideos(slider);
-				});
+				var visible = getVisibleCount();
+				var total = slider.find('.slick-slide:not(.slick-cloned)').length;
+				/* The slide that will be newly visible after the transition */
+				var direction = nextSlide > currentSlide ? 1 : -1;
+				/* Handle wrap-around */
+				if (currentSlide === 0 && nextSlide === total - 1) direction = -1;
+				if (currentSlide === total - 1 && nextSlide === 0) direction = 1;
+
+				if (direction > 0) {
+					/* Scrolling forward: preload the slide entering from right */
+					var newIdx = nextSlide + visible - 1;
+					if (newIdx < total) enqueueSlide(slider, newIdx);
+					/* Also preload one more ahead */
+					if (newIdx + 1 < total) enqueueSlide(slider, newIdx + 1);
+				} else {
+					/* Scrolling backward: preload the slide entering from left */
+					enqueueSlide(slider, nextSlide);
+					if (nextSlide - 1 >= 0) enqueueSlide(slider, nextSlide - 1);
+				}
+				processQueue();
 			});
 
-			/* On resize — re-evaluate */
+			/* AFTER slide changes — cleanup far slides */
+			$(document).on('afterChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide) {
+				var slider = $(this);
+				cleanupFarSlides(slider, currentSlide);
+			});
+
+			/* On resize */
 			var resizeTimer;
 			$(window).on('resize', function() {
 				clearTimeout(resizeTimer);
 				resizeTimer = setTimeout(initSliderVideos, 200);
 			});
 
-			/* Fallback for non-slider containers (single product page etc.) */
+			/* Fallback for non-slider containers */
 			setTimeout(function() {
 				$('.reel-video-container[data-lazy="true"]:not(.video-loaded)').each(function() {
 					var c = $(this);

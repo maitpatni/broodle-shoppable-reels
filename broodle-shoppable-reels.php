@@ -150,7 +150,7 @@ function broodle_sr_enqueue_assets() {
 			'popup-product',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/popup-product.css',
 			array(),
-			'2.1',
+			'2.2',
 			'all'
 		);
 	}
@@ -190,7 +190,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr.css',
 			array(),
-			'2.3',
+			'2.4',
 			'all'
 		);
 	}    

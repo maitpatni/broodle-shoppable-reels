@@ -10,8 +10,8 @@ body {
 }
 
 .slick-slide .slide_product_image {
-    height: 50px;
-    width: 50px;
+    height: 62px;
+    width: 62px;
     flex-shrink: 0;
 }
 

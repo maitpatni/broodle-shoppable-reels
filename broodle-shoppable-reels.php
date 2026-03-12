@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 1.6
+ * Version: 1.7
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -37,12 +37,18 @@ $broodle_sr_update_checker->addResultFilter( function ( $info ) {
 	return $info;
 });
 
-// Disable plugin repository view details button
+// Custom plugin action links and row meta
 add_filter('plugin_row_meta', 'broodle_sr_disable_view_details', 10, 2);
 function broodle_sr_disable_view_details($plugin_meta, $plugin_file) {
     if (plugin_basename(__FILE__) === $plugin_file) {
-        // Remove view details link by returning empty array for meta links
-        return array();
+        $plugin_data = get_plugin_data(__FILE__);
+        $version = isset($plugin_data['Version']) ? $plugin_data['Version'] : '1.0';
+        return array(
+            '<a href="https://broodle.host" target="_blank">Author</a>',
+            'Version ' . esc_html($version),
+            '<a href="https://github.com/maitpatni/broodle-shoppable-reels/releases" target="_blank">View Changelog</a>',
+            '<a href="https://broodle.one/marketplace" target="_blank" style="color:#e6500a;font-weight:600;">Get Premium</a>',
+        );
     }
     return $plugin_meta;
 }
@@ -129,6 +135,10 @@ if ( ! function_exists( 'broodle_sr_set_default_settings' ) ) {
         if ( get_option( 'broodle_sr_loading_bg_image' ) === false ) {
             update_option( 'broodle_sr_loading_bg_image', '' );
         }
+
+        if ( get_option( 'broodle_sr_google_font' ) === false ) {
+            update_option( 'broodle_sr_google_font', '' );
+        }
     }
 }
 
@@ -159,7 +169,7 @@ function broodle_sr_enqueue_assets() {
 			'popup-product',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/popup-product.css',
 			array(),
-			'3.0',
+			'3.1',
 			'all'
 		);
 	}
@@ -199,7 +209,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr.css',
 			array(),
-			'3.0',
+			'3.1',
 			'all'
 		);
 	}    
@@ -267,6 +277,34 @@ function broodle_sr_enqueue_assets() {
 			}
 		';
 		wp_add_inline_style( 'broodle-sr', $loading_bg_css );
+	}
+
+	// Enqueue Google Font if selected
+	$broodle_sr_font = get_option( 'broodle_sr_google_font', '' );
+	if ( ! empty( $broodle_sr_font ) ) {
+		$font_slug = str_replace( ' ', '+', $broodle_sr_font );
+		wp_enqueue_style(
+			'broodle-sr-google-font',
+			'https://fonts.googleapis.com/css2?family=' . esc_attr( $font_slug ) . ':wght@400;500;600;700&display=swap',
+			array(),
+			null,
+			'all'
+		);
+		$font_css = '
+			.reelUpSlider .product_name h5,
+			.reelUpSlider .sel_org_price,
+			.reelUpSlider .off_views .off,
+			.reelUpSlider .off_views .view,
+			.singlePagereelUpSlider .product_name h5,
+			.singlePagereelUpSlider .sel_org_price,
+			.productData_modal .product_name h5,
+			.productData_modal .sel_org_price,
+			.productData_modal .addtocart_moreinfo a,
+			#productDetail_modal .size .option .option_item {
+				font-family: "' . esc_attr( $broodle_sr_font ) . '", sans-serif !important;
+			}
+		';
+		wp_add_inline_style( 'broodle-sr', $font_css );
 	}
 }
 
@@ -1481,6 +1519,31 @@ if ( ! function_exists( 'broodle_sr_settings_page' ) ) {
 							<p class="description">This image is shown as the background while reel videos are loading. Leave empty for a plain dark background.</p>
 						</td>
 					</tr>
+					<tr valign="top">
+						<th scope="row">Google Font</th>
+						<td>
+							<?php $broodle_sr_font = get_option( 'broodle_sr_google_font', '' ); ?>
+							<select name="broodle_sr_google_font" id="broodle_sr_google_font" class="regular-text">
+								<option value="">— Default (inherit from theme) —</option>
+								<?php
+								$google_fonts = array(
+									'Inter', 'Poppins', 'Roboto', 'Open Sans', 'Montserrat', 'Lato', 'Nunito',
+									'Raleway', 'Oswald', 'Playfair Display', 'Merriweather', 'Source Sans 3',
+									'DM Sans', 'Outfit', 'Manrope', 'Space Grotesk', 'Plus Jakarta Sans',
+									'Figtree', 'Sora', 'Urbanist', 'Lexend', 'Rubik', 'Work Sans',
+									'Quicksand', 'Mulish', 'Barlow', 'Josefin Sans', 'Cabin', 'Karla',
+									'Libre Franklin', 'Noto Sans', 'PT Sans', 'Ubuntu', 'Titillium Web',
+								);
+								sort( $google_fonts );
+								foreach ( $google_fonts as $font ) {
+									$selected = ( $broodle_sr_font === $font ) ? ' selected' : '';
+									echo '<option value="' . esc_attr( $font ) . '"' . $selected . '>' . esc_html( $font ) . '</option>';
+								}
+								?>
+							</select>
+							<p class="description">Choose a Google Font for product titles, prices, and buttons displayed by this plugin.</p>
+						</td>
+					</tr>
 			    </table>
 				<?php
 				submit_button();
@@ -1520,6 +1583,7 @@ if ( ! function_exists( 'broodle_sr_register_reels_settings' ) ) {
         register_setting( 'broodle_sr_reels_settings_group', 'product_page_reels', 'absint' );
         register_setting( 'broodle_sr_reels_settings_group', 'product_page_video', 'absint' );
         register_setting( 'broodle_sr_reels_settings_group', 'broodle_sr_loading_bg_image', 'esc_url_raw' );
+        register_setting( 'broodle_sr_reels_settings_group', 'broodle_sr_google_font', 'sanitize_text_field' );
     }
     add_action('admin_init', 'broodle_sr_register_reels_settings');
 }

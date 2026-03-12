@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 1.4
+ * Version: 1.5
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -27,6 +27,15 @@ $broodle_sr_update_checker = PucFactory::buildUpdateChecker(
 
 // Set the branch that contains the stable release
 $broodle_sr_update_checker->setBranch('main');
+
+// Set plugin icon for updates screen
+$broodle_sr_update_checker->addResultFilter( function ( $info ) {
+	$info->icons = array(
+		'1x'      => BROODLE_SR_PLUGIN_URL . 'assets/img/plugin-icon.png',
+		'default' => BROODLE_SR_PLUGIN_URL . 'assets/img/plugin-icon.png',
+	);
+	return $info;
+});
 
 // Disable plugin repository view details button
 add_filter('plugin_row_meta', 'broodle_sr_disable_view_details', 10, 2);
@@ -270,7 +279,7 @@ function broodle_sr_admin_assets() {
 			'broodle-sr-admin',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr-admin.css',
 			array(),
-			'1.3',
+			'2.0',
 			'all'
 		);
 	} 
@@ -323,7 +332,7 @@ if(!function_exists('broodle_sr_custom_post_type_reels')) {
 			'label'               => __( 'reels', 'broodle-shoppable-reels' ),
 			'description'         => __( 'Reels news and reviews', 'broodle-shoppable-reels' ),
 			'labels'              => $labels,
-			'supports'            => array( 'title', 'editor', 'excerpt', 'author', 'thumbnail', 'comments', 'revisions', 'custom-fields', ),
+			'supports'            => array( 'title' ),
 			'taxonomies'          => array( 'broodle_sr_reels_cat' ),
 			'rewrite' => array('slug' => 'broodle-reels'),
 			'hierarchical'        => false,
@@ -407,6 +416,51 @@ if(!function_exists('broodle_sr_custom_post_type_reels')) {
 	add_action( 'init', 'broodle_sr_custom_post_type_reels', 0 );
 }
 
+// ─── Add video preview + product columns to reels list table ───
+add_filter( 'manage_broodle_sr_reels_posts_columns', 'broodle_sr_reels_columns' );
+function broodle_sr_reels_columns( $columns ) {
+	$new = array();
+	$new['cb']              = $columns['cb'];
+	$new['broodle_sr_thumb'] = __( 'Preview', 'broodle-shoppable-reels' );
+	$new['title']           = $columns['title'];
+	$new['broodle_sr_product'] = __( 'Product', 'broodle-shoppable-reels' );
+	$new['broodle_sr_views']   = __( 'Views', 'broodle-shoppable-reels' );
+	if ( isset( $columns['taxonomy-broodle_sr_reels_cat'] ) ) {
+		$new['taxonomy-broodle_sr_reels_cat'] = $columns['taxonomy-broodle_sr_reels_cat'];
+	}
+	$new['date'] = $columns['date'];
+	return $new;
+}
+
+add_action( 'manage_broodle_sr_reels_posts_custom_column', 'broodle_sr_reels_column_content', 10, 2 );
+function broodle_sr_reels_column_content( $column, $post_id ) {
+	if ( $column === 'broodle_sr_thumb' ) {
+		$video = get_post_meta( $post_id, 'medium_video', true );
+		if ( $video ) {
+			echo '<video muted preload="metadata" style="width:60px;height:80px;object-fit:cover;border-radius:6px;background:#1a1a1a;" src="' . esc_url( $video ) . '#t=0.5"></video>';
+		} else {
+			echo '<span style="display:inline-block;width:60px;height:80px;background:#f0f2f5;border-radius:6px;"></span>';
+		}
+	}
+	if ( $column === 'broodle_sr_product' ) {
+		$pid = get_post_meta( $post_id, 'reelSliderProduct', true );
+		if ( $pid && function_exists( 'wc_get_product' ) ) {
+			$product = wc_get_product( $pid );
+			if ( $product && $product->exists() ) {
+				echo esc_html( $product->get_name() );
+			} else {
+				echo '—';
+			}
+		} else {
+			echo '—';
+		}
+	}
+	if ( $column === 'broodle_sr_views' ) {
+		$views = get_post_meta( $post_id, 'reels_view', true );
+		echo esc_html( $views ? $views . 'k' : '—' );
+	}
+}
+
 if(!function_exists('broodle_sr_wporg_add_custom_box')){
 	function broodle_sr_wporg_add_custom_box()
 	{
@@ -439,132 +493,94 @@ if(!function_exists('broodle_sr_wporg_add_custom_box')){
 	add_action('add_meta_boxes', 'broodle_sr_wporg_add_custom_box',1);
 	function broodle_sr_wporg_custom_box_html1($post)
 	{
-			$medium_video = get_post_meta($post->ID, 'medium_video', true);
-			$reels_view = get_post_meta($post->ID, 'reels_view', true);	
-			$productsData = get_post_meta($post->ID, 'productsData', true);
-	
-		?>		
-		
-		<?php
-				$product_args = array(
-					'post_type'=> 'product',
-					'orderby'    => 'ID',
-					'post_status' => 'publish',
-					'order'    => 'DESC',
-					'posts_per_page' => -1
-					);
-				$result_products = new WP_Query( $product_args );	
+		$medium_video = get_post_meta($post->ID, 'medium_video', true);
+		$reels_view   = get_post_meta($post->ID, 'reels_view', true);
+		$productsData = get_post_meta($post->ID, 'productsData', true);
 
-				$reel_args = array(
-					'post_type'      => 'broodle_sr_reels',
-					'orderby'        => 'ID',
-					'post_status'    => 'publish',
-					'order'          => 'DESC',
-					'posts_per_page' => -1
-				);
-				
-				$result_reels = new WP_Query($reel_args);
+		$product_args = array( 'post_type' => 'product', 'orderby' => 'ID', 'post_status' => 'publish', 'order' => 'DESC', 'posts_per_page' => -1 );
+		$result_products = new WP_Query( $product_args );
 
-				//get All that product id which assign to any reel
-				$reelSliderProductArray = [];
-				if ($result_reels->have_posts()) {
-					while ($result_reels->have_posts()) {
-						$result_reels->the_post();
-						$products_data_reel = get_post_meta(get_the_ID(), 'reelSliderProduct', true);
-						if($products_data_reel){
-							$reelSliderProductArray[] = $products_data_reel;
-						}
-					}	
-				}
+		$reel_args = array( 'post_type' => 'broodle_sr_reels', 'orderby' => 'ID', 'post_status' => 'publish', 'order' => 'DESC', 'posts_per_page' => -1 );
+		$result_reels = new WP_Query( $reel_args );
 
-				//Get the reel product using current reel id
-				$currentReelProduct =  get_post_meta($post->ID, 'reelSliderProduct', true);
+		$reelSliderProductArray = [];
+		if ( $result_reels->have_posts() ) {
+			while ( $result_reels->have_posts() ) {
+				$result_reels->the_post();
+				$pid = get_post_meta( get_the_ID(), 'reelSliderProduct', true );
+				if ( $pid ) $reelSliderProductArray[] = $pid;
+			}
+		}
 
-				$products_data = get_post_meta($post->ID, 'productsData', true);
-				$CurrentReelRelatedproducts = maybe_unserialize($products_data);
-			?>
-			
-			<span id="pluginsPath" style="display:none;"><?php echo esc_attr( BROODLE_SR_PLUGIN_URL ); ?></span>
-			<div class="pkg_img_wrap5" style="margin-top: 10px;">
-				<div class="custom_img_box_wrap5">
-					<?php wp_nonce_field('broodle_sr_save_data', 'broodle_sr_nonce'); ?>
-					<?php if (!empty($medium_video)) { ?>
-					<div class="box">
-						<label>Medium Video</label>
-						<div class="video_box">			
-							<video controls class="upload_image_src upload_image_button" data-class="upload_image"
-									data-class1="upload_image_src">
-								<source  src="<?php  echo esc_url($medium_video); ?>" type="video/mp4">
-							</video>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
-							<input class="upload_image medium_video" type="hidden" size="25" name="medium_video"
-								value="<?php echo esc_url($medium_video);?>" /><br>
-						</div>
-					</div>
-					<?php } else { ?>
-					<div class="box">
-						<label>Medium Video</label>
-						<video controls width="10%" class="upload_image_src upload_image_button" data-class="upload_image" poster="<?php echo esc_url(BROODLE_SR_PLUGIN_URL);?>/assets/img/placeholder.jpg"
-								data-class1="upload_image_src">
-							<source  src="" type="video/mp4">
+		$currentReelProduct        = get_post_meta( $post->ID, 'reelSliderProduct', true );
+		$CurrentReelRelatedproducts = maybe_unserialize( $productsData );
+		wp_nonce_field( 'broodle_sr_save_data', 'broodle_sr_nonce' );
+		?>
+		<div class="broodle-sr-editor">
+			<!-- Left: Video Preview -->
+			<div class="broodle-sr-editor-left">
+				<div class="broodle-sr-video-preview">
+					<?php if ( ! empty( $medium_video ) ) : ?>
+						<video controls class="broodle-sr-video upload_image_src upload_image_button" data-class="upload_image" data-class1="upload_image_src">
+							<source src="<?php echo esc_url( $medium_video ); ?>" type="video/mp4">
 						</video>
-						<input class="upload_image medium_video newreeluploadvideo" type="hidden" size="25" name="medium_video"
-							value="" />	
-					</div>
-					<?php } ?>	
-					<?php if (!empty($reels_view)) { ?>
-					<div class="box">
-						<label>Reel Views:</label>
-						<input type="text" name="reels_view" class="reels_view" value="<?php echo esc_html($reels_view);?>">
-					</div>
-					<?php } else { ?>
-					<div class="box">
-						<label>Reel Views:</label>
-						<input type="text" name="reels_view" class="reels_view">
-					</div>
-					<?php } ?>	
-					<div class="box">
-						<label for="">Select Product: </label>
-						<select name="reelSliderProduct" id="" class="reelSliderProduct">
-							<option value="">--Select Reel Product--</option>
-							<?php
-									if ($result_products->have_posts()) {			
-										while ($result_products->have_posts()) {
-											$result_products->the_post();
-											if(!in_array(get_the_ID(),$reelSliderProductArray)){
-												echo '<option value="'.esc_attr(get_the_ID()).'">'. esc_html(get_the_title()) .'</option>';
-											}
-											if(get_the_ID() == $currentReelProduct){
-												echo '<option value="'.esc_attr(get_the_ID()).'" selected>'. esc_html(get_the_title()) .'</option>';
-											}
-										}
-									}
-									?>
-						</select>
-					</div>
-					<div class="box">
-						<label for="">Select Related Product: </label>
-						<select name="productsData[]" id="productsData" multiple multiselect-search="true" multiselect-max-items="4">
-							<?php
-									if ($result_products->have_posts()) {			
-										while ($result_products->have_posts()) {
-											$result_products->the_post();	
-											if(!empty($CurrentReelRelatedproducts) && in_array(get_the_ID(),$CurrentReelRelatedproducts)){
-												echo '<option value="'.esc_attr(get_the_ID()).'" selected>'. esc_html(get_the_title()) . '</option>';								
-											}else{										
-												echo '<option value="'.esc_attr(get_the_ID()).'">'. esc_html(get_the_title()) .'</option>';
-											}
-										}
-									}
-									?>
-						</select>
-					</div>
+						<button type="button" class="broodle-sr-video-remove" title="Remove video"><span class="dashicons dashicons-no-alt"></span></button>
+					<?php else : ?>
+						<div class="broodle-sr-video-empty upload_image_src upload_image_button" data-class="upload_image" data-class1="upload_image_src">
+							<span class="dashicons dashicons-video-alt3"></span>
+							<span>Click to upload video</span>
+						</div>
+					<?php endif; ?>
+					<input class="upload_image medium_video newreeluploadvideo" type="hidden" name="medium_video" value="<?php echo esc_url( $medium_video ); ?>" />
 				</div>
 			</div>
+			<!-- Right: Fields -->
+			<div class="broodle-sr-editor-right">
+				<div class="broodle-sr-field">
+					<label>Reel Views</label>
+					<input type="text" name="reels_view" class="reels_view" value="<?php echo esc_attr( $reels_view ); ?>" placeholder="e.g. 12">
+					<p class="broodle-sr-hint">Displayed as social proof (shown as Xk)</p>
+				</div>
+				<div class="broodle-sr-field">
+					<label>Primary Product</label>
+					<select name="reelSliderProduct" class="reelSliderProduct">
+						<option value="">— Select Product —</option>
+						<?php
+						if ( $result_products->have_posts() ) {
+							while ( $result_products->have_posts() ) {
+								$result_products->the_post();
+								$pid = get_the_ID();
+								if ( $pid == $currentReelProduct ) {
+									echo '<option value="' . esc_attr( $pid ) . '" selected>' . esc_html( get_the_title() ) . '</option>';
+								} elseif ( ! in_array( $pid, $reelSliderProductArray ) ) {
+									echo '<option value="' . esc_attr( $pid ) . '">' . esc_html( get_the_title() ) . '</option>';
+								}
+							}
+						}
+						?>
+					</select>
+				</div>
+				<div class="broodle-sr-field">
+					<label>Related Products <span class="broodle-sr-badge">Max 4</span></label>
+					<select name="productsData[]" id="productsData" multiple multiselect-search="true" multiselect-max-items="4">
+						<?php
+						if ( $result_products->have_posts() ) {
+							while ( $result_products->have_posts() ) {
+								$result_products->the_post();
+								$pid = get_the_ID();
+								$sel = ( ! empty( $CurrentReelRelatedproducts ) && is_array( $CurrentReelRelatedproducts ) && in_array( $pid, $CurrentReelRelatedproducts ) ) ? ' selected' : '';
+								echo '<option value="' . esc_attr( $pid ) . '"' . $sel . '>' . esc_html( get_the_title() ) . '</option>';
+							}
+						}
+						?>
+					</select>
+				</div>
+			</div>
+		</div>
 		<?php
-			wp_enqueue_script('media-upload');
-			wp_enqueue_script('thickbox');
-			wp_enqueue_media();	
+		wp_enqueue_script( 'media-upload' );
+		wp_enqueue_script( 'thickbox' );
+		wp_enqueue_media();
 	}
 
 	function broodle_sr_wporg_custom_box_html2($post)

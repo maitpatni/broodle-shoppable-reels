@@ -145,10 +145,24 @@ jQuery(document).ready(function ($) {
         file_frame.open();
     });
 
-    jQuery(document).on('click', '.video_box svg', function () {
-        jQuery(this).parent('div').find('.medium_video').val('');
-        jQuery(this).parent('div').find('source').attr('src', '');
-        jQuery(this).parent('div').find('video')[0].load();
+    jQuery(document).on('click', '.video_box svg, .broodle-sr-video-remove', function () {
+        var container = jQuery(this).closest('.video_box, .broodle-sr-video-preview');
+        container.find('.medium_video').val('');
+        container.find('source').attr('src', '');
+        var video = container.find('video');
+        if (video.length) {
+            video.get(0).load();
+        }
+        // If in new editor layout, show empty state
+        if (container.hasClass('broodle-sr-video-preview')) {
+            container.html(
+                '<div class="broodle-sr-video-empty upload_image_src upload_image_button" data-class="upload_image" data-class1="upload_image_src">' +
+                '<span class="dashicons dashicons-video-alt3"></span>' +
+                '<span>Click to upload video</span>' +
+                '</div>' +
+                '<input class="upload_image medium_video newreeluploadvideo" type="hidden" name="medium_video" value="" />'
+            );
+        }
     });
 
 });

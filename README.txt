@@ -1,82 +1,154 @@
-=== Broodle Shoppable Reels ===
+=== Shoppable Reels for WooCommerce ===
 Contributors: Broodle
-Tags: reels, video reels, shoppable videos, woocommerce, product videos
+Tags: reels, shoppable videos, woocommerce reels, video commerce, product videos, shoppable reels, video shopping, instagram reels, tiktok shop, short video, video carousel, product carousel, video slider, woocommerce video, video marketing, social commerce, video gallery, product video, shop by video, video storefront
 Requires at least: 5.0
 Tested up to: 6.7.1
-Stable tag: 1.9.1
+Stable tag: 2.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Add interactive, shoppable video reels to your WooCommerce store. Let customers browse and buy products directly from engaging short-form video content.
+Add Instagram-style shoppable video reels to your WooCommerce store. Let customers discover and buy products directly from short-form video content.
 
 == Description ==
 
-Broodle Shoppable Reels brings short-form video commerce to your WooCommerce store. Create video reels, attach products, and let customers shop directly from the video — all within a responsive, mobile-friendly interface.
+**Shoppable Reels for WooCommerce** brings short-form video commerce natively into your store. Create video reels, attach WooCommerce products, and let customers shop directly from the video — no third-party embeds, no iframes, no monthly fees.
 
-**Key Features:**
+Drop a shortcode on any page and your products come alive with video. Customers see product details, pricing, size options, and add-to-cart — all within a modern, responsive popup without ever leaving the page.
 
-* Shoppable video reels with WooCommerce product integration
-* Responsive Slick-powered carousel (3 slides desktop, 2 mobile)
-* Three popup layout options: Reel + Product, Reel only, Product only
-* Automatic reel display on single product pages with floating video widget
-* Lazy video loading with configurable background image and spinner
-* Related products shown inside the popup modal
-* Dedicated Reels Categories taxonomy for organizing content
-* Auto-updates from GitHub repository
+**Perfect for:** Fashion stores, beauty brands, electronics shops, food & beverage, home decor, jewelry, fitness gear, and any WooCommerce store that wants to boost engagement and conversions with video.
+
+= Key Features =
+
+* **Shoppable Video Reels** — Link any WooCommerce product to a video reel with one click
+* **Modern Popup Modal** — Sleek product popup with video, image gallery, size selector, and buy buttons
+* **Responsive Carousel** — 3 slides on desktop, 2 on mobile with smooth Slick-powered transitions
+* **Smart Lazy Loading** — Videos load sequentially with preloading for zero-spinner slide transitions
+* **Google Fonts** — 34+ fonts to match your brand across all plugin elements
+* **Category Shortcodes** — Display reels by category slug or ID with optional limits
+* **Single Product Page Reels** — Auto-display related reels on product pages with floating video widget
+* **Custom Loading Backgrounds** — Branded background image while videos buffer
+* **Related Products** — Cross-sell up to 4 related products inside the popup
+* **Clean Admin Editor** — Purpose-built reel editor, no bloat from third-party plugins
+* **Auto-Updates** — Seamless updates via GitHub, shown in standard WordPress update screen
+* **Fully Mobile Responsive** — Optimized popup and carousel for all screen sizes
+
+= Shortcodes =
+
+* `[broodle_reel_slider]` — All published reels
+* `[broodle_reel_slider 12,34,56]` — Specific reels by ID
+* `[broodle_reel_category slug="fashion"]` — Reels by category slug
+* `[broodle_reel_category category="5,8" limit="6"]` — Reels by category ID with limit
 
 == Installation ==
 
 1. Upload the `broodle-shoppable-reels` folder to `/wp-content/plugins/`.
-2. Activate the plugin through the **Plugins** menu in WordPress.
-3. WooCommerce must be active. The plugin will deactivate with a notice if WooCommerce is missing.
+2. Activate from **Plugins** in WordPress admin.
+3. WooCommerce must be active — the plugin deactivates with a notice if missing.
 4. Go to **Shoppable Reels → Add New** to create your first reel.
-5. Use the shortcode `[broodle_reel_slider]` to display reels on any page or post.
+5. Use `[broodle_reel_slider]` on any page to display reels.
 
-Updates are delivered automatically from the public GitHub repository — no extra configuration needed.
+Updates are delivered automatically from the public GitHub repository.
 
 == Frequently Asked Questions ==
 
 = How do I display reels on a page? =
-
-Use the shortcode `[broodle_reel_slider]` to show all published reels. To show specific reels by ID: `[broodle_reel_slider 12,34,56]`. To show reels by category: `[broodle_reel_category slug="fashion"]` or `[broodle_reel_category category="5,8" limit="6"]`.
-
-= How do I add a video to a product page? =
-
-Edit any WooCommerce product, scroll to the **Shoppable Reels Layout** meta box, upload a video in the **Right Video** field, and save. A floating video widget will appear on that product page.
+Use `[broodle_reel_slider]` for all reels, or `[broodle_reel_category slug="fashion"]` for category-specific reels.
 
 = What popup layouts are available? =
+Three options in **Shoppable Reels → Settings**: Reel + Product (side by side), Reel only, or Product only.
 
-Three options configurable from **Shoppable Reels → Settings**: Reels And Product (side by side), Reels only, or Product only.
+= Can I customize the font? =
+Yes. Go to **Shoppable Reels → Settings → Google Font** and choose from 34+ popular fonts.
 
-= Does this plugin work without WooCommerce? =
+= Does this work without WooCommerce? =
+No. WooCommerce is required and must be active.
 
-No. WooCommerce is required. The plugin will deactivate itself if WooCommerce is not active.
+= How do updates work? =
+Updates are delivered automatically from GitHub. When a new version is tagged, it appears in **Dashboard → Updates**.
 
-= How do I set a custom loading background? =
+== Screenshots ==
 
-Go to **Shoppable Reels → Settings** and use the **Loading Background Image** field to upload or select an image. This image displays while reel videos are loading. Leave it empty for a plain dark background.
+1. Reel carousel on the frontend
+2. Product popup modal (desktop)
+3. Product popup modal (mobile)
+4. Reel editor in WordPress admin
+5. Plugin settings page
 
 == Changelog ==
 
-= 1.2 =
-* Added configurable loading background image setting
-* Added lazy video loading with spinner animation
-* Added null safety checks throughout AJAX handlers
-* Added floating video widget and fullscreen modal on product pages
-* Improved mobile responsive layout and font sizing
-* Three configurable popup layout options
-* Related products support in popup modal
-* Reels Categories taxonomy for content organization
-* Auto-update support from private GitHub repository
+= 2.0 =
+* Major release consolidating all improvements since v1.0
+* Smart sequential lazy loading with beforeChange preloading
+* Google Fonts integration (34+ fonts)
+* Complete mobile popup redesign (70/30 video/content split)
+* Plugin listing with Author, Version, Changelog, and Get Premium links
+* Rounded gallery images in popup
+* Larger carousel product thumbnails with pop-out effect
+* 2-line product name clamp across carousel and popup
+* Clean reel editor with third-party meta boxes removed
+* Film-strip menu icon with play button
+
+= 1.9.1 =
+* Preload next slide on beforeChange so video is ready before scrolling into view
+* Eliminated spinner flash when sliding to next batch
+* Smarter queue system that skips already-loaded slides
+
+= 1.9 =
+* Version consolidation release
+
+= 1.8.2 =
+* Rewrote lazy loading to be fully sequential (video 1 then 2 then 3)
+* Changed to preload auto for faster individual loads
+* Queue-based system with one-by-one loading on slide change
+
+= 1.8.1 =
+* Mobile popup 70/30 video/content split
+* Mobile carousel product image reverted to original small size
+* White close button on mobile popup
+* Gallery arrows and dot indicators in mobile popup
+
+= 1.8 =
+* Fixed mobile popup overflow with 100dvh viewport constraint
+* Film-strip menu icon with sprocket holes and play triangle
+* Third-party meta boxes removed from reel editor
+
+= 1.7 =
+* Google Fonts setting with 34 popular fonts
+* Plugin listing row meta links (Author, Version, Changelog, Get Premium)
+* Rounded gallery images and larger product thumbnails
+* Product name 2-line clamp in popup
+
+= 1.6 =
+* Complete popup modal redesign with modern styling
+* Mobile popup as bottom sheet with video top, product bottom
+* Pill-shaped buttons, refined size selector, hover effects
+* Mobile video height reverted to 300px
+
+= 1.5 =
+* Custom plugin icon on updates screen
+* Redesigned reel editor with two-column layout
+* Video preview and product columns in reels list table
+* Admin CSS overhaul
+
+= 1.4 =
+* Product thumbnail pop-out effect on carousel
+* Popup gallery increased to 300px with modern slider dots
+* Popup max-height increased to 600px
+
+= 1.3 =
+* Category-based shortcode [broodle_reel_category]
+* Modern admin UI with card-based settings
+* Custom reel SVG menu icon
+* Carousel height increased, product info restructured
 
 = 1.0 =
 * Initial release
 
 == Upgrade Notice ==
 
-= 1.2 =
-Major update with configurable loading backgrounds, lazy video loading, improved mobile experience, and auto-update support.
+= 2.0 =
+Major update: smart video preloading, Google Fonts, redesigned mobile popup, clean admin editor, and 10+ improvements. Recommended for all users.
 
 == Privacy Policy ==
 

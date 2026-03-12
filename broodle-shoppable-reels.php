@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 1.5
+ * Version: 1.6
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -159,7 +159,7 @@ function broodle_sr_enqueue_assets() {
 			'popup-product',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/popup-product.css',
 			array(),
-			'2.2',
+			'3.0',
 			'all'
 		);
 	}
@@ -199,7 +199,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr.css',
 			array(),
-			'2.4',
+			'3.0',
 			'all'
 		);
 	}    

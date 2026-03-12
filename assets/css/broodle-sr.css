@@ -195,8 +195,8 @@ body {
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
     .reel-video-container {
-        height: 360px; /* 20% taller than previous 300px */
-        max-height: 360px;
+        height: 300px; /* Original mobile height */
+        max-height: 300px;
         background: #1a1a1a center center;
         background-size: cover;
         overflow: hidden;

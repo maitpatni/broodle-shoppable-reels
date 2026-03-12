@@ -24,6 +24,19 @@ body {
 
 /* Mobile responsive font size adjustments */
 @media (max-width: 768px) {
+    /* Product image back to original small size on mobile */
+    .slick-slide .slide_product_image {
+        height: 50px;
+        width: 50px;
+    }
+
+    .reelUpSlider .slide_product_image {
+        height: 50px !important;
+        width: 50px !important;
+        margin-top: -10px !important;
+        border-radius: 8px !important;
+    }
+
     /* Product name font size increased by 20% from previous 0.7em */
     .slick-slide .product_name,
     .slick-slide .product_name h5 {
@@ -40,11 +53,6 @@ body {
     .slick-slide .off,
     .slick-slide .view {
         font-size: 0.8em !important;
-    }
-    
-    /* Hide navigation dots from product image carousel in mobile popup */
-    #productDetail_modal .product_slider .slick-dots {
-        display: none !important;
     }
 }
 

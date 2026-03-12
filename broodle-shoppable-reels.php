@@ -150,7 +150,7 @@ function broodle_sr_enqueue_assets() {
 			'popup-product',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/popup-product.css',
 			array(),
-			'2.0',
+			'2.1',
 			'all'
 		);
 	}
@@ -190,7 +190,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr.css',
 			array(),
-			'2.2',
+			'2.3',
 			'all'
 		);
 	}    
@@ -744,17 +744,19 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 										</div>
 									</div>							
 								</div>
+							</div>
+							<div class="reel_product_info">
 								<div class="slide_product_image">
 									'.wp_get_attachment_image( $product->get_image_id()).'
 								</div>
-							</div>
-							<div style="padding: 10px 20px;">
-								<div class="product_name">
-									<h5>'. $product->get_title().'</h5>
+								<div class="reel_product_text">
+									<div class="product_name">
+										<h5>'. esc_html($product->get_title()).'</h5>
+									</div>
+									<div class="sel_org_price">
+										'. $price_html .'
+									</div>
 								</div>
-								<div class="sel_org_price">
-									'. $price_html .'
-								</div>							
 							</div>
 						</div>					
 					</div>';
@@ -1080,11 +1082,13 @@ if ( ! function_exists( 'broodle_sr_reel_cat_shortcode_func' ) ) {
 									<div class="reel-video-spinner"><div class="spinner"></div></div>
 								</div>
 							</div>
-							<div class="slide_product_image">' . wp_get_attachment_image( $product->get_image_id() ) . '</div>
 						</div>
-						<div style="padding:10px 20px;">
-							<div class="product_name"><h5>' . esc_html( $product->get_title() ) . '</h5></div>
-							<div class="sel_org_price">' . $price_html . '</div>
+						<div class="reel_product_info">
+							<div class="slide_product_image">' . wp_get_attachment_image( $product->get_image_id() ) . '</div>
+							<div class="reel_product_text">
+								<div class="product_name"><h5>' . esc_html( $product->get_title() ) . '</h5></div>
+								<div class="sel_org_price">' . $price_html . '</div>
+							</div>
 						</div>
 					</div>
 				</div>';

@@ -5,15 +5,13 @@
 }
 
 .reelUpSlider .slide_product_image {
-    height: 45px;
-    width: 60px;
-    position: absolute;
-    bottom: -15px;
-    left: 15px;
+    height: 50px;
+    width: 50px;
     box-shadow: 0 0 14px 4px #80808024;
     border-radius: 10px;
-    z-index: 100 !important; /* Ensure product image appears above everything including background */
-    background: white; /* Solid background to block anything behind */
+    z-index: 100 !important;
+    background: white;
+    flex-shrink: 0;
 }
 
 .reelUpSlider .reel_product_image video {
@@ -36,19 +34,23 @@
 .reelUpSlider .product_name h5 {
     color: rgb(15, 15, 15);
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
     font-family: inherit;
-    margin: 18px 0 5px;
+    margin: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .reelUpSlider .sel_org_price {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1;
-    font-weight: 500;
-    display: flex;
-    gap: 10px;
-    margin: 10px 0;
     font-weight: 600;
+    display: flex;
+    gap: 6px;
+    margin: 4px 0 0;
     font-family: inherit;
 }
 

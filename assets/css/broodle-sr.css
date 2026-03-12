@@ -10,7 +10,9 @@ body {
 }
 
 .slick-slide .slide_product_image {
-    height: 50px !important;
+    height: 50px;
+    width: 50px;
+    flex-shrink: 0;
 }
 
 /*.slick-track  video{
@@ -48,21 +50,36 @@ body {
 
 /* Reel Slider Heading Styles */
 .reelUpSlider div h5 {
-    margin-top: 22px !important;
+    margin-top: 0 !important;
     margin-bottom: 0px !important;
 }
 
 /* Reel Slider Price Section */
 .reelUpSlider div .sel_org_price {
-    margin-top: 5px;
+    margin-top: 4px;
+}
+
+/* Product info row: photo + name/price side by side, vertically centered */
+.reelUpSlider .reel_product_info,
+.singlePagereelUpSlider .reel_product_info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+}
+
+.reelUpSlider .reel_product_text,
+.singlePagereelUpSlider .reel_product_text {
+    min-width: 0; /* allow text truncation */
+    flex: 1;
 }
 
 /* Lazy Loading Video Styles */
 .reel-video-container {
     position: relative;
     width: 100%;
-    height: 500px; /* Fixed height for desktop slider */
-    max-height: 500px; /* Prevent container from growing beyond this */
+    height: 600px; /* 20% taller than previous 500px */
+    max-height: 600px;
     background: #1a1a1a center center;
     background-size: cover;
     border-radius: 10px 10px 0 0;
@@ -157,10 +174,9 @@ body {
     background-size: cover;
 }
 
-/* Add space at bottom for absolutely positioned product image */
+/* Ensure reel_product_image contains the video */
 .reelUpSlider .reel_product_image {
-    position: relative; /* Ensure it can contain absolutely positioned children */
-    padding-bottom: 20px; /* Space for the product image that extends below */
+    position: relative;
 }
 
 /* Ensure off_views (percentage off and views count) appear above video */
@@ -179,11 +195,11 @@ body {
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
     .reel-video-container {
-        height: 300px; /* Fixed height for mobile slider */
-        max-height: 300px; /* Prevent overflow */
+        height: 360px; /* 20% taller than previous 300px */
+        max-height: 360px;
         background: #1a1a1a center center;
         background-size: cover;
-        overflow: hidden; /* Ensure content stays within bounds */
+        overflow: hidden;
     }
     
     .videoDiv.reel-video-container {

@@ -49,6 +49,18 @@ Display specific reels by post ID:
 [broodle_reel_slider 12,34,56]
 ```
 
+Display reels from a specific category by slug:
+
+```
+[broodle_reel_category slug="fashion"]
+```
+
+Display reels from multiple categories by ID, with a limit:
+
+```
+[broodle_reel_category category="5,8" limit="6"]
+```
+
 ### Creating a Reel
 
 1. Go to **Shoppable Reels → Add New** in the WordPress admin.

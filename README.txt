@@ -3,7 +3,7 @@ Contributors: Broodle
 Tags: reels, video reels, shoppable videos, woocommerce, product videos
 Requires at least: 5.0
 Tested up to: 6.7.1
-Stable tag: 1.2
+Stable tag: 1.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -39,7 +39,7 @@ Updates are delivered automatically from the public GitHub repository — no ext
 
 = How do I display reels on a page? =
 
-Use the shortcode `[broodle_reel_slider]` to show all reels with "Show in Home Slider" enabled. To show specific reels by ID: `[broodle_reel_slider 12,34,56]`.
+Use the shortcode `[broodle_reel_slider]` to show all reels with "Show in Home Slider" enabled. To show specific reels by ID: `[broodle_reel_slider 12,34,56]`. To show reels by category: `[broodle_reel_category slug="fashion"]` or `[broodle_reel_category category="5,8" limit="6"]`.
 
 = How do I add a video to a product page? =
 

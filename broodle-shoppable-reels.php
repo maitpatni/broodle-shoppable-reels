@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 1.2
+ * Version: 1.3
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -15,7 +15,7 @@ define( 'BROODLE_SR_PLUGIN_FILE', __FILE__ );
 define( 'BROODLE_SR_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BROODLE_SR_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
-// ─── Auto-update from private GitHub repo ───
+// ─── Auto-update from public GitHub repo ───
 require_once BROODLE_SR_PLUGIN_DIR . 'includes/plugin-update-checker/plugin-update-checker.php';
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
@@ -270,7 +270,7 @@ function broodle_sr_admin_assets() {
 			'broodle-sr-admin',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr-admin.css',
 			array(),
-			'1.0',
+			'1.3',
 			'all'
 		);
 	} 
@@ -333,6 +333,7 @@ if(!function_exists('broodle_sr_custom_post_type_reels')) {
 			'show_in_nav_menus'   => true,
 			'show_in_admin_bar'   => true,
 			'menu_position'       => 80,
+			'menu_icon'           => 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="6" x2="12" y2="6.01"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>'),
 			'can_export'          => true,
 			'has_archive'         => true,
 			'exclude_from_search' => false,
@@ -1024,6 +1025,114 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 	add_shortcode('broodle_reel_slider', 'broodle_sr_reel_slider_shortcode_func');
 }
 
+// ─── Category-based shortcode ───
+if ( ! function_exists( 'broodle_sr_reel_cat_shortcode_func' ) ) {
+	function broodle_sr_reel_cat_shortcode_func( $atts ) {
+		$atts = shortcode_atts( array(
+			'category' => '',
+			'slug'     => '',
+			'limit'    => -1,
+		), $atts, 'broodle_reel_category' );
+
+		$tax_query = array();
+		if ( ! empty( $atts['slug'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'broodle_sr_reels_cat',
+				'field'    => 'slug',
+				'terms'    => array_map( 'trim', explode( ',', $atts['slug'] ) ),
+			);
+		} elseif ( ! empty( $atts['category'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'broodle_sr_reels_cat',
+				'field'    => 'term_id',
+				'terms'    => array_map( 'absint', explode( ',', $atts['category'] ) ),
+			);
+		}
+
+		if ( empty( $tax_query ) ) {
+			return '<p>Please specify a category or slug. Usage: [broodle_reel_category slug="my-category"]</p>';
+		}
+
+		$args = array(
+			'post_type'      => 'broodle_sr_reels',
+			'orderby'        => 'ID',
+			'post_status'    => 'publish',
+			'order'          => 'DESC',
+			'posts_per_page' => intval( $atts['limit'] ),
+			'tax_query'      => $tax_query,
+		);
+
+		$result = new WP_Query( $args );
+		$html = '<div class="reelUpSlider">';
+
+		if ( $result->have_posts() ) :
+			while ( $result->have_posts() ) : $result->the_post();
+				$data_product_id = get_post_meta( get_the_ID(), 'reelSliderProduct', true );
+				if ( ! $data_product_id ) { continue; }
+
+				$videoData   = get_post_meta( get_the_ID(), 'medium_video' );
+				$reels_view  = get_post_meta( get_the_ID(), 'reels_view', true );
+				$product     = wc_get_product( $data_product_id );
+				if ( ! $product || ! $product->exists() ) { continue; }
+
+				if ( $product->is_type( 'variable' ) ) {
+					$variations = $product->get_available_variations();
+					if ( ! empty( $variations ) ) {
+						$first_var     = wc_get_product( $variations[0]['variation_id'] );
+						$regular_price = $first_var->get_regular_price();
+						$sale_price    = $first_var->get_sale_price();
+					} else {
+						$regular_price = $product->get_variation_regular_price( 'min' );
+						$sale_price    = $product->get_variation_sale_price( 'min' );
+					}
+				} else {
+					$regular_price = $product->get_regular_price();
+					$sale_price    = $product->get_sale_price();
+				}
+
+				$discountPer = 0;
+				if ( ! empty( $regular_price ) && ! empty( $sale_price ) && $sale_price > 0 && $sale_price < $regular_price ) {
+					$discountPer = round( ( ( $regular_price - $sale_price ) / $regular_price ) * 100 );
+				}
+
+				$price_html = '';
+				if ( ! empty( $sale_price ) && $sale_price > 0 && $sale_price < $regular_price ) {
+					$price_html  = '<div class="selling_price">₹' . number_format( $sale_price, 2 ) . '</div>';
+					$price_html .= '<div class="regular_price">₹<del>' . number_format( $regular_price, 2 ) . '</del></div>';
+				} else {
+					$price_html = '<div class="selling_price">₹' . number_format( $regular_price, 2 ) . '</div>';
+				}
+
+				$html .= '<div>
+					<div class="reel_product" data-product_id="' . esc_attr( $data_product_id ) . '" data-reel_id="' . esc_attr( get_the_ID() ) . '">
+						<div class="reel_product_image">
+							<div class="off_views">
+								<span class="off" style="' . ( $discountPer > 0 ? 'visibility:visible;' : 'visibility:hidden;' ) . '">' . ( $discountPer > 0 ? $discountPer : '0' ) . '% off</span><span class="view"><i class="fa-solid fa-eye"></i>&nbsp;' . esc_html( $reels_view ) . 'k</span>
+							</div>
+							<div class="reel-video-container" data-video-src="' . esc_url( $videoData[0] ) . '" data-lazy="true">
+								<div class="reel-video-placeholder">
+									<div class="reel-video-spinner"><div class="spinner"></div></div>
+								</div>
+							</div>
+							<div class="slide_product_image">' . wp_get_attachment_image( $product->get_image_id() ) . '</div>
+						</div>
+						<div style="padding:10px 20px;">
+							<div class="product_name"><h5>' . esc_html( $product->get_title() ) . '</h5></div>
+							<div class="sel_org_price">' . $price_html . '</div>
+						</div>
+					</div>
+				</div>';
+			endwhile;
+		else :
+			$html .= '<p>No reels found in this category.</p>';
+		endif;
+		wp_reset_postdata();
+		$html .= '</div>';
+		return $html;
+	}
+	add_shortcode( 'broodle_reel_category', 'broodle_sr_reel_cat_shortcode_func' );
+}
+
 if(!function_exists('broodle_sr_create_user_form_ajax')){
 
 	add_action('wp_ajax_nopriv_broodle_sr_create_user_form_ajax', 'broodle_sr_create_user_form_ajax'); 
@@ -1320,14 +1429,32 @@ if ( ! function_exists( 'broodle_sr_settings_page' ) ) {
 
 		<div class="wrap broodle-sr-setting">
 			<h1>Shoppable Reels Settings</h1>
+			<p class="broodle-sr-subtitle">Configure how reels display on your store.</p>
 			<form method="post" action="options.php">
 				<?php
 				settings_fields('broodle_sr_reels_settings_group');
 				do_settings_sections('broodle-reels-settings');?>
 				<table class="form-table">
 			        <tr valign="top">
-						<th scope="row">Short Code</th>
-						<td>[broodle_reel_slider] , [broodle_reel_slider 1,2,3,4,5]</td>
+						<th scope="row">Shortcodes</th>
+						<td>
+							<div class="broodle-sr-shortcode-card" style="margin-bottom:8px;">
+								<code>[broodle_reel_slider]</code>
+								<span>All reels with "Show in Home Slider" enabled</span>
+							</div><br>
+							<div class="broodle-sr-shortcode-card" style="margin-bottom:8px;">
+								<code>[broodle_reel_slider 1,2,3]</code>
+								<span>Specific reels by post ID</span>
+							</div><br>
+							<div class="broodle-sr-shortcode-card" style="margin-bottom:8px;">
+								<code>[broodle_reel_category slug="my-category"]</code>
+								<span>Reels by category slug</span>
+							</div><br>
+							<div class="broodle-sr-shortcode-card">
+								<code>[broodle_reel_category category="5,8" limit="6"]</code>
+								<span>Reels by category ID with limit</span>
+							</div>
+						</td>
 			        </tr>
 			        
 					<tr valign="top">

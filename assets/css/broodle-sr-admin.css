@@ -1,79 +1,388 @@
+/* ─── Shoppable Reels Admin UI ─── */
+
+/* Global admin page background */
 .interface-navigable-region {
-    background: #f9f9f9;
+    background: #f0f2f5;
 }
 
-#broodle_sr_box_id1 {
-    border: 1px solid #ddd !important;
-    margin: 20px 20px !important;
+/* ─── Meta Box Styling ─── */
+#broodle_sr_box_id1,
+#broodle_sr_box_id2 {
+    border: none !important;
+    margin: 20px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06) !important;
+    overflow: hidden;
+    background: #fff;
 }
 
-.postbox-header {
+#broodle_sr_box_id1 .postbox-header,
+#broodle_sr_box_id2 .postbox-header {
     border-top: none !important;
-    border-bottom: 1px solid #ddd !important;
+    border-bottom: 1px solid #e8eaed !important;
+    background: #fafbfc;
+    padding: 12px 20px !important;
 }
 
-#broodle_sr_box_id1.closed .postbox-header {
+#broodle_sr_box_id1 .postbox-header h2,
+#broodle_sr_box_id2 .postbox-header h2 {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1e1e1e;
+    letter-spacing: -0.01em;
+}
+
+#broodle_sr_box_id1.closed .postbox-header,
+#broodle_sr_box_id2.closed .postbox-header {
     border-bottom: none !important;
 }
 
+#broodle_sr_box_id1 .inside,
+#broodle_sr_box_id2 .inside {
+    padding: 20px !important;
+}
+
+/* ─── Meta Box Form Fields ─── */
 .custom_img_box_wrap5 .box {
-    margin: 20px 0
+    margin: 0 0 20px 0;
 }
 
-.checkbox {
-    display: flex;
-    align-items: center;
+.custom_img_box_wrap5 .box:last-child {
+    margin-bottom: 0;
 }
 
-.custom_img_box_wrap5 .box>label {
+.custom_img_box_wrap5 .box > label {
     display: block;
-    font-size: 14px;
-    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1e1e;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
 }
 
 .custom_img_box_wrap5 .box .reels_view,
-.custom_img_box_wrap5 .box select,
-.custom_img_box_wrap5 .box .multiselect-dropdown {
+.custom_img_box_wrap5 .box select {
     display: block;
-    width: 50%;
-    padding: 0.375rem 0.75rem;
+    width: 100%;
+    max-width: 480px;
+    padding: 8px 12px;
+    font-size: 13px;
     line-height: 1.5;
+    color: #1e1e1e;
     background-color: #fff;
     background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    -webkit-appearance: none;
+}
+
+.custom_img_box_wrap5 .box .reels_view:focus,
+.custom_img_box_wrap5 .box select:focus {
+    border-color: #3858e9;
+    box-shadow: 0 0 0 3px rgba(56, 88, 233, 0.12);
+    outline: none;
 }
 
 .custom_img_box_wrap5 .box .multiselect-dropdown {
-    width: calc(50% - 25px) !important;
+    display: block;
+    width: 100% !important;
+    max-width: 480px !important;
+    padding: 4px 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    background-color: #fff;
+    border: 1px solid #d0d5dd !important;
+    border-radius: 8px !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.custom_img_box_wrap5 .box .multiselect-dropdown:focus-within {
+    border-color: #3858e9 !important;
+    box-shadow: 0 0 0 3px rgba(56, 88, 233, 0.12);
 }
 
 .multiselect-dropdown span.maxselected {
     width: fit-content !important;
 }
 
-.broodle-sr-setting input {
-    width: 100%;
-}
-
-.broodle-sr-setting .button-primary {
-    width: 10%;
-}
-
-.broodle-sr-setting .checkbox input {
-    width: 1rem;
-}
-
-.video_box {
-    width: 20%;
-    position: relative;
-    min-height: 200px;
+/* ─── Checkbox Toggle ─── */
+.checkbox {
     display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid #d0d5dd;
+    cursor: pointer;
+    accent-color: #3858e9;
+}
+
+.checkbox label {
+    font-size: 13px;
+    color: #475467;
+    cursor: pointer;
+    margin: 0 !important;
+}
+
+/* ─── Video Upload Box ─── */
+.video_box {
+    width: 240px;
+    position: relative;
+    min-height: 160px;
+    display: flex;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f0f2f5;
+    border: 2px dashed #d0d5dd;
+}
+
+.video_box video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 .video_box svg {
     position: absolute;
-    width: 15px;
-    right: -20px;
+    width: 20px;
+    height: 20px;
+    right: -28px;
+    top: 0;
     cursor: pointer;
+    padding: 4px;
+    background: #fee2e2;
+    border-radius: 6px;
+    fill: #dc2626;
+    transition: background 0.15s ease;
+}
+
+.video_box svg:hover {
+    background: #
+fecaca;
+}
+
+.upload_image_button {
+    cursor: pointer;
+}
+
+/* Placeholder video click area */
+video.upload_image_button[poster] {
+    border-radius: 10px;
+    background: #f0f2f5;
+    cursor: pointer;
+}
+
+/* ─── Settings Page ─── */
+.broodle-sr-setting {
+    max-width: 860px;
+    margin: 20px auto 40px;
+    padding: 0;
+}
+
+.broodle-sr-setting > h1 {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #101828;
+    margin-bottom: 4px !important;
+    letter-spacing: -0.02em;
+}
+
+.broodle-sr-setting > .broodle-sr-subtitle {
+    color: #667085;
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.broodle-sr-setting form {
+    background: #fff;
+    border: 1px solid #e8eaed;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.broodle-sr-setting .form-table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.broodle-sr-setting .form-table th {
+    padding: 20px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #344054;
+    width: 220px;
+    vertical-align: top;
+    border-bottom: 1px solid #f2f4f7;
+    background: transparent;
+}
+
+.broodle-sr-setting .form-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f2f4f7;
+    vertical-align: top;
+}
+
+.broodle-sr-setting .form-table tr:last-child th,
+.broodle-sr-setting .form-table tr:last-child td {
+    border-bottom: none;
+}
+
+.broodle-sr-setting .form-table td .description {
+    color: #667085;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.broodle-sr-setting .form-table select {
+    min-width: 240px;
+    padding: 8px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1e1e1e;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.broodle-sr-setting .form-table select:focus {
+    border-color: #3858e9;
+    box-shadow: 0 0 0 3px rgba(56, 88, 233, 0.12);
+    outline: none;
+}
+
+.broodle-sr-setting .form-table input[type="text"],
+.broodle-sr-setting .form-table input.regular-text {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1e1e1e;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.broodle-sr-setting .form-table input[type="text"]:focus,
+.broodle-sr-setting .form-table input.regular-text:focus {
+    border-color: #3858e9;
+    box-shadow: 0 0 0 3px rgba(56, 88, 233, 0.12);
+    outline: none;
+}
+
+.broodle-sr-setting .form-table .checkbox {
+    gap: 8px;
+}
+
+.broodle-sr-setting .form-table .checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    accent-color: #3858e9;
+}
+
+.broodle-sr-setting .form-table .checkbox label {
+    font-size: 13px;
+    color: #475467;
+}
+
+/* Settings submit button */
+.broodle-sr-setting p.submit {
+    padding: 16px 24px !important;
+    margin: 0 !important;
+    border-top: 1px solid #f2f4f7;
+    background: #fafbfc;
+    border-radius: 0 0 12px 12px;
+}
+
+.broodle-sr-setting .button-primary {
+    background: #3858e9 !important;
+    border-color: #3858e9 !important;
+    border-radius: 8px !important;
+    padding: 6px 20px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    height: auto !important;
+    line-height: 1.6 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
+    transition: background 0.15s ease !important;
+    text-shadow: none !important;
+}
+
+.broodle-sr-setting .button-primary:hover {
+    background: #2d4ad8 !important;
+    border-color: #2d4ad8 !important;
+}
+
+.broodle-sr-setting .button {
+    border-radius: 8px !important;
+    padding: 6px 16px !important;
+    font-size: 13px !important;
+    height: auto !important;
+    line-height: 1.6 !important;
+}
+
+/* Loading BG image preview */
+.broodle-sr-setting #broodle_sr_bg_preview {
+    border: 1px solid #e8eaed;
+    border-radius: 8px;
+}
+
+/* ─── Shortcode Display Card ─── */
+.broodle-sr-shortcode-card {
+    background: #f0f4ff;
+    border: 1px solid #d4deff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: inline-block;
+}
+
+.broodle-sr-shortcode-card code {
+    background: #fff;
+    border: 1px solid #d4deff;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 12px;
+    color: #3858e9;
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+.broodle-sr-shortcode-card span {
+    color: #667085;
+    font-size: 12px;
+}
+
+/* ─── Menu Icon Color Fix ─── */
+#adminmenu .menu-icon-broodle_sr_reels .wp-menu-image img,
+#adminmenu .menu-icon-broodle_sr_reels .wp-menu-image svg {
+    opacity: 0.7;
+}
+
+#adminmenu .menu-icon-broodle_sr_reels:hover .wp-menu-image img,
+#adminmenu .menu-icon-broodle_sr_reels:hover .wp-menu-image svg,
+#adminmenu .current .menu-icon-broodle_sr_reels .wp-menu-image img,
+#adminmenu .current .menu-icon-broodle_sr_reels .wp-menu-image svg {
+    opacity: 1;
+}
+
+/* ─── CPT List Table Tweaks ─── */
+.post-type-broodle_sr_reels .wp-list-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.post-type-broodle_sr_reels .wp-list-table thead th {
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #667085;
 }

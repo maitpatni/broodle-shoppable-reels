@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 1.7
+ * Version: 1.8
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -169,7 +169,7 @@ function broodle_sr_enqueue_assets() {
 			'popup-product',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/popup-product.css',
 			array(),
-			'3.1',
+			'3.2',
 			'all'
 		);
 	}
@@ -209,7 +209,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr.css',
 			array(),
-			'3.1',
+			'3.2',
 			'all'
 		);
 	}    
@@ -380,7 +380,7 @@ if(!function_exists('broodle_sr_custom_post_type_reels')) {
 			'show_in_nav_menus'   => true,
 			'show_in_admin_bar'   => true,
 			'menu_position'       => 80,
-			'menu_icon'           => 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="6" x2="12" y2="6.01"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>'),
+			'menu_icon'           => 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="2" y="4" width="20" height="3"/><rect x="2" y="17" width="20" height="3"/><line x1="6" y1="4" x2="6" y2="7"/><line x1="10" y1="4" x2="10" y2="7"/><line x1="14" y1="4" x2="14" y2="7"/><line x1="18" y1="4" x2="18" y2="7"/><line x1="6" y1="17" x2="6" y2="20"/><line x1="10" y1="17" x2="10" y2="20"/><line x1="14" y1="17" x2="14" y2="20"/><line x1="18" y1="17" x2="18" y2="20"/><polygon points="10,9.5 16,12 10,14.5" fill="black" stroke="none"/></svg>'),
 			'can_export'          => true,
 			'has_archive'         => true,
 			'exclude_from_search' => false,
@@ -529,6 +529,31 @@ if(!function_exists('broodle_sr_wporg_add_custom_box')){
 		
 	}
 	add_action('add_meta_boxes', 'broodle_sr_wporg_add_custom_box',1);
+
+	// Remove all third-party meta boxes from reel editor — keep only ours
+	add_action('add_meta_boxes', 'broodle_sr_remove_third_party_metaboxes', 999);
+	function broodle_sr_remove_third_party_metaboxes() {
+		global $wp_meta_boxes;
+		$screen = 'broodle_sr_reels';
+		if ( ! isset( $wp_meta_boxes[ $screen ] ) ) {
+			return;
+		}
+		$keep = array(
+			'broodle_sr_box_id1',   // Our reel fields
+			'submitdiv',            // Publish box
+			'broodle_sr_reels_catdiv', // Our taxonomy
+			'slugdiv',              // Slug (WP core)
+		);
+		foreach ( $wp_meta_boxes[ $screen ] as $context => $priorities ) {
+			foreach ( $priorities as $priority => $boxes ) {
+				foreach ( $boxes as $id => $box ) {
+					if ( ! in_array( $id, $keep, true ) ) {
+						remove_meta_box( $id, $screen, $context );
+					}
+				}
+			}
+		}
+	}
 	function broodle_sr_wporg_custom_box_html1($post)
 	{
 		$medium_video = get_post_meta($post->ID, 'medium_video', true);

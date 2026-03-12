@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 1.8
+ * Version: 1.8.2
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -910,8 +910,11 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 		</div>
 		
 		<script type="text/javascript">
-		jQuery(document).ready(function() {
-			// Lazy loading implementation
+		jQuery(document).ready(function($) {
+			/* ── Sequential lazy-loading for reel carousels ── */
+			var loadQueue = [];
+			var isLoading = false;
+
 			function unloadVideo(container) {
 				var video = container.find('video');
 				if (video.length) {
@@ -920,150 +923,176 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 					video.get(0).load();
 					video.remove();
 				}
-				container.removeClass('video-loaded loaded').addClass('loading');
+				container.removeClass('video-loaded loaded loading');
 				container.find('.reel-video-placeholder').removeClass('hidden').show();
 			}
-			
-			function loadVideo(container) {
+
+			/* Load a single video and return; calls processQueue when done */
+			function loadVideo(container, callback) {
 				var videoSrc = container.attr('data-video-src');
-				if (videoSrc && !container.hasClass('video-loaded')) {
-					container.addClass('video-loaded');
-					var video = document.createElement('video');
-					video.setAttribute('autoplay', '');
-					video.setAttribute('muted', '');
-					video.setAttribute('loop', '');
-					video.setAttribute('playsinline', '');
+				if (!videoSrc || container.hasClass('video-loaded')) {
+					if (callback) callback();
+					return;
+				}
+				container.addClass('video-loaded loading');
+				var video = document.createElement('video');
+				video.setAttribute('autoplay', '');
+				video.setAttribute('muted', '');
+				video.setAttribute('loop', '');
+				video.setAttribute('playsinline', '');
+				video.muted = true;
+				video.volume = 0;
+				video.preload = 'auto';
+
+				var source = document.createElement('source');
+				source.src = videoSrc;
+				source.type = 'video/mp4';
+				video.appendChild(source);
+
+				var done = false;
+				function finish() {
+					if (done) return;
+					done = true;
+					container.addClass('loaded').removeClass('loading');
+					container.find('.reel-video-placeholder').addClass('hidden').hide();
 					video.muted = true;
 					video.volume = 0;
-					video.preload = 'metadata';
-					var source = document.createElement('source');
-					source.src = videoSrc;
-					source.type = 'video/mp4';
-					video.appendChild(source);
-					
-					video.addEventListener('canplay', function() {
-						container.addClass('loaded').removeClass('loading');
-						container.find('.reel-video-placeholder').addClass('hidden').hide();
-						video.muted = true;
-						video.volume = 0;
-						var playPromise = video.play();
-						if (playPromise !== undefined) {
-							playPromise.then(function() {
-								video.muted = true;
-								video.volume = 0;
-							}).catch(function(error) {
-								video.style.opacity = '1';
-							});
-						}
-					});
-					
-					video.addEventListener('playing', function() {
-						video.muted = true;
-						video.volume = 0;
-						video.style.opacity = '1';
-					});
-					
-					video.addEventListener('error', function(e) {
-						container.removeClass('loading');
-						container.find('.reel-video-placeholder').hide();
-					});
-					
-					video.addEventListener('volumechange', function() {
-						if (!video.muted || video.volume > 0) {
-							video.muted = true;
-							video.volume = 0;
-						}
-					});
-					
-					container.append(video);
-					video.load();
+					var p = video.play();
+					if (p !== undefined) {
+						p.catch(function() { video.style.opacity = '1'; });
+					}
+					if (callback) callback();
 				}
+
+				video.addEventListener('canplay', finish);
+				video.addEventListener('playing', function() {
+					video.muted = true;
+					video.volume = 0;
+					video.style.opacity = '1';
+				});
+				video.addEventListener('error', function() {
+					container.removeClass('loading');
+					container.find('.reel-video-placeholder').hide();
+					done = true;
+					if (callback) callback();
+				});
+				video.addEventListener('volumechange', function() {
+					if (!video.muted || video.volume > 0) { video.muted = true; video.volume = 0; }
+				});
+
+				container.append(video);
+				video.load();
 			}
-			
-			function isInViewport(element) {
-				var rect = element.get(0).getBoundingClientRect();
-				return rect.top < window.innerHeight && rect.bottom > 0;
+
+			/* Process the queue one video at a time */
+			function processQueue() {
+				if (isLoading || loadQueue.length === 0) return;
+				isLoading = true;
+				var container = loadQueue.shift();
+				/* Skip if already loaded or removed from DOM */
+				if (!container.length || container.hasClass('loaded')) {
+					isLoading = false;
+					processQueue();
+					return;
+				}
+				loadVideo(container, function() {
+					isLoading = false;
+					processQueue();
+				});
 			}
-			
-			function loadVisibleSlideVideos() {
+
+			/* Enqueue videos for the visible slides (sequential) */
+			function enqueueVisibleVideos(slider) {
 				var isDesktop = window.innerWidth > 768;
 				var visibleSlides = isDesktop ? 3 : 2;
 				var preloadAhead = 1;
-				var unloadDistance = 3;
-				
-				jQuery('.reelUpSlider, .singlePagereelUpSlider').each(function() {
-					var slider = jQuery(this);
+				var unloadDistance = 4;
+
+				if (!slider.hasClass('slick-initialized')) return;
+
+				var currentSlide = slider.slick('slickCurrentSlide');
+				var totalSlides = slider.find('.slick-slide:not(.slick-cloned)').length;
+				var startSlide = Math.max(0, currentSlide);
+				var endSlide = Math.min(totalSlides - 1, currentSlide + visibleSlides + preloadAhead - 1);
+
+				/* Enqueue visible + preload-ahead slides sequentially */
+				for (var i = startSlide; i <= endSlide; i++) {
+					var slideEl = slider.find('.slick-slide[data-slick-index="' + i + '"]');
+					var vc = slideEl.find('.reel-video-container[data-lazy="true"]:not(.video-loaded)');
+					if (vc.length) {
+						vc.addClass('loading');
+						loadQueue.push(vc);
+					}
+				}
+
+				/* Unload far-away slides to save memory */
+				slider.find('.slick-slide:not(.slick-cloned)').each(function() {
+					var idx = parseInt($(this).attr('data-slick-index'), 10);
+					if (isNaN(idx)) return;
+					if (idx < currentSlide - unloadDistance || idx > endSlide + unloadDistance) {
+						var vc = $(this).find('.reel-video-container.video-loaded');
+						if (vc.length) unloadVideo(vc);
+					}
+				});
+
+				processQueue();
+			}
+
+			/* Initial load — start as soon as slick is ready */
+			function initSliderVideos() {
+				$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
+					var slider = $(this);
 					if (slider.hasClass('slick-initialized')) {
-						var currentSlide = slider.slick('slickCurrentSlide');
-						var totalSlides = slider.find('.slick-slide:not(.slick-cloned)').length;
-						var startSlide = Math.max(0, currentSlide);
-						var endSlide = Math.min(totalSlides - 1, currentSlide + visibleSlides + preloadAhead - 1);
-						
-						for (var i = startSlide; i <= endSlide; i++) {
-							var slideElement = slider.find('.slick-slide[data-slick-index="' + i + '"]');
-							var videoContainer = slideElement.find('.reel-video-container[data-lazy="true"]:not(.video-loaded)');
-							if (videoContainer.length) {
-								videoContainer.addClass('loading');
-								loadVideo(videoContainer);
-							}
-						}
-						
-						slider.find('.slick-slide:not(.slick-cloned)').each(function(index) {
-							var slideIndex = jQuery(this).attr('data-slick-index');
-							if (slideIndex && (slideIndex < currentSlide - unloadDistance || slideIndex > endSlide + unloadDistance)) {
-								var videoContainer = jQuery(this).find('.reel-video-container.video-loaded');
-								if (videoContainer.length) {
-									unloadVideo(videoContainer);
-								}
-							}
-						});
-					} else {
-						slider.find('.reel-video-container[data-lazy="true"]:not(.video-loaded)').slice(0, visibleSlides + preloadAhead).each(function() {
-							jQuery(this).addClass('loading');
-							loadVideo(jQuery(this));
-						});
+						enqueueVisibleVideos(slider);
 					}
 				});
 			}
-			
-			function debounce(func, wait) {
-				var timeout;
-				return function executedFunction() {
-					var later = function() {
-						clearTimeout(timeout);
-						func();
-					};
-					clearTimeout(timeout);
-					timeout = setTimeout(later, wait);
-				};
+
+			/* Fire immediately if slick is already initialized, otherwise poll briefly */
+			var initAttempts = 0;
+			function tryInit() {
+				var anyInit = false;
+				$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
+					if ($(this).hasClass('slick-initialized')) anyInit = true;
+				});
+				if (anyInit || initAttempts > 20) {
+					initSliderVideos();
+				} else {
+					initAttempts++;
+					setTimeout(tryInit, 150);
+				}
 			}
-			
-			var debouncedLoadVideos = debounce(loadVisibleSlideVideos, 150);
-			
-			jQuery(window).on('load', function() {
-				setTimeout(function() {
-					loadVisibleSlideVideos();
-				}, 1000);
-			});
-			
-			jQuery(document).on('afterChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide) {
+			tryInit();
+
+			/* On slide change — enqueue next batch */
+			$(document).on('afterChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick) {
+				var slider = $(this);
+				/* Clear any pending queue items from previous position */
+				loadQueue = [];
 				requestAnimationFrame(function() {
-					loadVisibleSlideVideos();
+					enqueueVisibleVideos(slider);
 				});
 			});
-			
-			jQuery(window).on('resize', debouncedLoadVideos);
-			
+
+			/* On resize — re-evaluate */
+			var resizeTimer;
+			$(window).on('resize', function() {
+				clearTimeout(resizeTimer);
+				resizeTimer = setTimeout(initSliderVideos, 200);
+			});
+
+			/* Fallback for non-slider containers (single product page etc.) */
 			setTimeout(function() {
-				jQuery('.reel-video-container[data-lazy="true"]:not(.video-loaded)').each(function() {
-					var container = jQuery(this);
-					if (!container.closest('.reelUpSlider, .singlePagereelUpSlider').length || 
-						!container.closest('.reelUpSlider, .singlePagereelUpSlider').hasClass('slick-initialized')) {
-						container.addClass('loading');
-						loadVideo(container);
+				$('.reel-video-container[data-lazy="true"]:not(.video-loaded)').each(function() {
+					var c = $(this);
+					if (!c.closest('.reelUpSlider, .singlePagereelUpSlider').length ||
+						!c.closest('.reelUpSlider, .singlePagereelUpSlider').hasClass('slick-initialized')) {
+						c.addClass('loading');
+						loadQueue.push(c);
 					}
 				});
-			}, 5000);
+				processQueue();
+			}, 3000);
 		});
 		</script>
 		<?php

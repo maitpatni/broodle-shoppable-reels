@@ -39,7 +39,7 @@ Updates are delivered automatically from the public GitHub repository — no ext
 
 = How do I display reels on a page? =
 
-Use the shortcode `[broodle_reel_slider]` to show all reels with "Show in Home Slider" enabled. To show specific reels by ID: `[broodle_reel_slider 12,34,56]`. To show reels by category: `[broodle_reel_category slug="fashion"]` or `[broodle_reel_category category="5,8" limit="6"]`.
+Use the shortcode `[broodle_reel_slider]` to show all published reels. To show specific reels by ID: `[broodle_reel_slider 12,34,56]`. To show reels by category: `[broodle_reel_category slug="fashion"]` or `[broodle_reel_category category="5,8" limit="6"]`.
 
 = How do I add a video to a product page? =
 

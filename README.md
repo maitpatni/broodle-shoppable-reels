@@ -37,7 +37,7 @@ The plugin automatically checks for updates from its [GitHub repository](https:/
 
 ### Shortcodes
 
-Display all reels that have "Show in Home Slider" enabled:
+Display all published reels:
 
 ```
 [broodle_reel_slider]
@@ -68,8 +68,7 @@ Display reels from multiple categories by ID, with a limit:
 3. Set the reel view count (displayed as social proof).
 4. Select a primary product from the dropdown — this product's details appear in the popup.
 5. Optionally select up to 4 related products.
-6. Check **Hide/Show In Home Slider** to include the reel in the default shortcode output.
-7. Publish the reel.
+6. Publish the reel.
 
 ### Adding a Video to a Product Page
 

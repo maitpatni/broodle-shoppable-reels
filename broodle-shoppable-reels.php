@@ -441,8 +441,7 @@ if(!function_exists('broodle_sr_wporg_add_custom_box')){
 	{
 			$medium_video = get_post_meta($post->ID, 'medium_video', true);
 			$reels_view = get_post_meta($post->ID, 'reels_view', true);	
-			$productsData = get_post_meta($post->ID, 'productsData', true);	
-			$show_home_slider = get_post_meta( $post->ID, 'show_home_slider', true);
+			$productsData = get_post_meta($post->ID, 'productsData', true);
 	
 		?>		
 		
@@ -560,23 +559,6 @@ if(!function_exists('broodle_sr_wporg_add_custom_box')){
 									?>
 						</select>
 					</div>
-					<?php if (!empty($show_home_slider)) { ?>
-					<div class="box">
-						<label>Hide/Show In Home Slider</label>
-						<div class="checkbox">
-							<input type="checkbox" name="show_home_slider" id="show_home_slider" class="show_home_slider" value="1" <?php echo ($show_home_slider == 1) ? 'checked' : '' ;?>>
-							<label for="show_home_slider">Hide/Show</label>
-						</div>
-					</div>
-					<?php } else { ?>
-					<div class="box">
-						<label>Hide/Show In Home Slider</label>
-						<div class="checkbox">
-							<input type="checkbox" name="show_home_slider" id="show_home_slider" class="show_home_slider" value="1">
-							<label for="show_home_slider" >Hide/Show</label>
-						</div>
-					</div>
-					<?php } ?>	
 				</div>
 			</div>
 		<?php
@@ -666,14 +648,6 @@ if (!function_exists('broodle_sr_save_postdata')) {
             update_post_meta($post_id, 'productsData', maybe_serialize($productIds));
         }   
 
-		if (isset($_POST['show_home_slider'])) {
-            $show_home_slider = sanitize_text_field(wp_unslash($_POST['show_home_slider']));
-            $show_home_slider = absint($show_home_slider);
-            update_post_meta($post_id, 'show_home_slider', $show_home_slider);
-        } else {
-			update_post_meta($post_id, 'show_home_slider', 0);
-		}
-
 		if (isset($_POST['right_video'])) {
             $right_video = sanitize_text_field(wp_unslash($_POST['right_video']));
             $right_video = esc_url_raw($right_video);
@@ -698,14 +672,7 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 				'orderby'    => 'ID',
 				'post_status' => 'publish',
 				'order'    => 'DESC',
-				'posts_per_page' => -1,
-				'meta_query'     => array(
-					array(
-						'key'     => 'show_home_slider',
-						'value'   => 1,
-						'compare' => '='
-					)
-				)
+				'posts_per_page' => -1
 			);
 		}else{
 			$args = array(
@@ -722,7 +689,6 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 		if ($result->have_posts()) :
 			while ($result->have_posts()) : $result->the_post();
 				$data_product_id = get_post_meta(get_the_ID(), 'reelSliderProduct', true);
-				$show = get_post_meta(get_the_ID(), 'show_home_slider', true);				
 				if($data_product_id){	
 						$videoData = get_post_meta( get_the_ID(),'medium_video'); 
 						$reels_view = get_post_meta( get_the_ID(),'reels_view', true); 		
@@ -1440,7 +1406,7 @@ if ( ! function_exists( 'broodle_sr_settings_page' ) ) {
 						<td>
 							<div class="broodle-sr-shortcode-card" style="margin-bottom:8px;">
 								<code>[broodle_reel_slider]</code>
-								<span>All reels with "Show in Home Slider" enabled</span>
+								<span>Display all published reels</span>
 							</div><br>
 							<div class="broodle-sr-shortcode-card" style="margin-bottom:8px;">
 								<code>[broodle_reel_slider 1,2,3]</code>

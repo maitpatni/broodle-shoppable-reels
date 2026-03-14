@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 2.0.1
+ * Version: 2.0.2
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -803,15 +803,16 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 					// Build price display HTML
 					$regular_price = floatval( $regular_price );
 					$sale_price    = floatval( $sale_price );
+					$has_price = ( $regular_price > 0 || $sale_price > 0 );
 					$price_html = '';
 					
-					if ( $sale_price > 0 && $regular_price > 0 && $sale_price < $regular_price ) {
-						$price_html = '<div class="selling_price">₹'. number_format($sale_price, 2) .'</div>';
-						$price_html .= '<div class="regular_price">₹<del>'. number_format($regular_price, 2) .'</del></div>';
-					} elseif ( $regular_price > 0 ) {
-						$price_html = '<div class="selling_price">₹'. number_format($regular_price, 2) .'</div>';
-					} else {
-						$price_html = '<div class="selling_price">₹0.00</div>';
+					if ( $has_price ) {
+						if ( $sale_price > 0 && $regular_price > 0 && $sale_price < $regular_price ) {
+							$price_html = '<div class="selling_price">₹'. number_format($sale_price, 2) .'</div>';
+							$price_html .= '<div class="regular_price">₹<del>'. number_format($regular_price, 2) .'</del></div>';
+						} elseif ( $regular_price > 0 ) {
+							$price_html = '<div class="selling_price">₹'. number_format($regular_price, 2) .'</div>';
+						}
 					}
 					
 					$html .= '<div>
@@ -836,9 +837,7 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 									<div class="product_name">
 										<h5>'. esc_html($product->get_title()).'</h5>
 									</div>
-									<div class="sel_org_price">
-										'. $price_html .'
-									</div>
+									'. ( $has_price ? '<div class="sel_org_price">' . $price_html . '</div>' : '' ) .'
 								</div>
 							</div>
 						</div>					
@@ -1029,8 +1028,8 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 			/* Unload slides far from current view */
 			function cleanupFarSlides(slider, currentSlide) {
 				var visible = getVisibleCount();
-				var keepFrom = currentSlide - 2;
-				var keepTo = currentSlide + visible + 2;
+				var keepFrom = currentSlide - visible;
+				var keepTo = currentSlide + visible * 3;
 				slider.find('.slick-slide:not(.slick-cloned)').each(function() {
 					var idx = parseInt($(this).attr('data-slick-index'), 10);
 					if (isNaN(idx)) return;
@@ -1041,15 +1040,16 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 				});
 			}
 
-			/* Initial load: enqueue slides 0, 1, 2 (or 0, 1 on mobile) sequentially */
+			/* Initial load: enqueue visible slides + next full screen ahead */
 			function initSliderVideos() {
 				$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
 					var slider = $(this);
 					if (!slider.hasClass('slick-initialized')) return;
 					var visible = getVisibleCount();
 					var total = slider.find('.slick-slide:not(.slick-cloned)').length;
-					/* Enqueue visible slides + 1 ahead */
-					for (var i = 0; i < Math.min(visible + 1, total); i++) {
+					/* Load visible + one full screen ahead */
+					var loadTo = Math.min(visible * 2, total);
+					for (var i = 0; i < loadTo; i++) {
 						enqueueSlide(slider, i);
 					}
 					processQueue();
@@ -1072,28 +1072,20 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 			}
 			tryInit();
 
-			/* BEFORE slide changes — preload the slide about to enter view */
+			/* BEFORE slide changes — preload the entire next screen of slides */
 			$(document).on('beforeChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide, nextSlide) {
 				var slider = $(this);
 				var visible = getVisibleCount();
 				var total = slider.find('.slick-slide:not(.slick-cloned)').length;
-				/* The slide that will be newly visible after the transition */
-				var direction = nextSlide > currentSlide ? 1 : -1;
-				/* Handle wrap-around */
-				if (currentSlide === 0 && nextSlide === total - 1) direction = -1;
-				if (currentSlide === total - 1 && nextSlide === 0) direction = 1;
-
-				if (direction > 0) {
-					/* Scrolling forward: preload the slide entering from right */
-					var newIdx = nextSlide + visible - 1;
-					if (newIdx < total) enqueueSlide(slider, newIdx);
-					/* Also preload one more ahead */
-					if (newIdx + 1 < total) enqueueSlide(slider, newIdx + 1);
-				} else {
-					/* Scrolling backward: preload the slide entering from left */
-					enqueueSlide(slider, nextSlide);
-					if (nextSlide - 1 >= 0) enqueueSlide(slider, nextSlide - 1);
+				/* Always ensure visible + one full screen ahead are loaded */
+				var loadFrom = Math.max(0, nextSlide);
+				var loadTo = Math.min(total, nextSlide + visible + visible);
+				for (var i = loadFrom; i < loadTo; i++) {
+					enqueueSlide(slider, i);
 				}
+				/* Also handle backward scrolling */
+				var loadBack = Math.max(0, nextSlide - 1);
+				enqueueSlide(slider, loadBack);
 				processQueue();
 			});
 
@@ -1202,14 +1194,15 @@ if ( ! function_exists( 'broodle_sr_reel_cat_shortcode_func' ) ) {
 
 				$regular_price = floatval( $regular_price );
 				$sale_price    = floatval( $sale_price );
+				$has_price = ( $regular_price > 0 || $sale_price > 0 );
 				$price_html = '';
-				if ( $sale_price > 0 && $regular_price > 0 && $sale_price < $regular_price ) {
-					$price_html  = '<div class="selling_price">₹' . number_format( $sale_price, 2 ) . '</div>';
-					$price_html .= '<div class="regular_price">₹<del>' . number_format( $regular_price, 2 ) . '</del></div>';
-				} elseif ( $regular_price > 0 ) {
-					$price_html = '<div class="selling_price">₹' . number_format( $regular_price, 2 ) . '</div>';
-				} else {
-					$price_html = '<div class="selling_price">₹0.00</div>';
+				if ( $has_price ) {
+					if ( $sale_price > 0 && $regular_price > 0 && $sale_price < $regular_price ) {
+						$price_html  = '<div class="selling_price">₹' . number_format( $sale_price, 2 ) . '</div>';
+						$price_html .= '<div class="regular_price">₹<del>' . number_format( $regular_price, 2 ) . '</del></div>';
+					} elseif ( $regular_price > 0 ) {
+						$price_html = '<div class="selling_price">₹' . number_format( $regular_price, 2 ) . '</div>';
+					}
 				}
 
 				$html .= '<div>
@@ -1228,7 +1221,7 @@ if ( ! function_exists( 'broodle_sr_reel_cat_shortcode_func' ) ) {
 							<div class="slide_product_image">' . wp_get_attachment_image( $product->get_image_id() ) . '</div>
 							<div class="reel_product_text">
 								<div class="product_name"><h5>' . esc_html( $product->get_title() ) . '</h5></div>
-								<div class="sel_org_price">' . $price_html . '</div>
+								' . ( $has_price ? '<div class="sel_org_price">' . $price_html . '</div>' : '' ) . '
 							</div>
 						</div>
 					</div>
@@ -1273,6 +1266,7 @@ if(!function_exists('broodle_sr_create_user_form_ajax')){
 		$regular_price = $product->get_regular_price();
 		$sale_price = $product->get_sale_price();
 		$current_price = $product->get_price();
+		$has_price = ( floatval( $regular_price ) > 0 || floatval( $sale_price ) > 0 || floatval( $current_price ) > 0 );
 		
 		$data['product'] = [
 			"product_id" => $product_id,
@@ -1280,6 +1274,7 @@ if(!function_exists('broodle_sr_create_user_form_ajax')){
 			"product_name" => $product->get_name(),
 			"selling_price" => !empty($sale_price) && $sale_price > 0 && $sale_price < $regular_price ? $sale_price : $current_price,
 			"original_price" => $regular_price,
+			"has_price" => $has_price,
 			"product_description" => $product->get_description(),
 			"product_url" => get_permalink($product_id),
 			"add_to_cart" => esc_url(wc_get_cart_url() . '?add-to-cart=' . $product_id),

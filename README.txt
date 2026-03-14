@@ -3,7 +3,7 @@ Contributors: Broodle
 Tags: reels, shoppable videos, woocommerce reels, video commerce, product videos, shoppable reels, video shopping, instagram reels, tiktok shop, short video, video carousel, product carousel, video slider, woocommerce video, video marketing, social commerce, video gallery, product video, shop by video, video storefront
 Requires at least: 5.0
 Tested up to: 6.7.1
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html

@@ -67,16 +67,26 @@ jQuery("body").on('click', '.reel_product', function () {
             var priceHtml = '';
             var sellingPrice = parseFloat(response.product.selling_price) || 0;
             var originalPrice = parseFloat(response.product.original_price) || 0;
+            var hasPrice = response.product.has_price;
             
-            if (sellingPrice > 0 && originalPrice > 0 && sellingPrice < originalPrice) {
-                priceHtml = `<div class="selling_price">₹<span>${sellingPrice.toFixed(2)}</span></div><div class="regular_price">₹<del><span>${originalPrice.toFixed(2)}</span></del></div>`;
+            if (hasPrice) {
+                if (sellingPrice > 0 && originalPrice > 0 && sellingPrice < originalPrice) {
+                    priceHtml = `<div class="selling_price">₹<span>${sellingPrice.toFixed(2)}</span></div><div class="regular_price">₹<del><span>${originalPrice.toFixed(2)}</span></del></div>`;
+                } else if (originalPrice > 0) {
+                    priceHtml = `<div class="selling_price">₹<span>${originalPrice.toFixed(2)}</span></div>`;
+                } else if (sellingPrice > 0) {
+                    priceHtml = `<div class="selling_price">₹<span>${sellingPrice.toFixed(2)}</span></div>`;
+                }
+                jQuery('#productDetail_modal').find('.sel_org_price').html(priceHtml).show();
+                jQuery('#productDetail_modal').find('.addtocart_moreinfo').html(
+                    `<a href="${response.product.product_url}" class="more-info">More info</a><a href="${response.product.add_to_cart}" class="add-to-cart">Add to Cart</a>`
+                ).show();
             } else {
-                priceHtml = `<div class="selling_price">₹<span>${originalPrice.toFixed(2)}</span></div>`;
+                jQuery('#productDetail_modal').find('.sel_org_price').html('').hide();
+                jQuery('#productDetail_modal').find('.addtocart_moreinfo').html(
+                    `<a href="${response.product.product_url}" class="more-info">More info</a>`
+                ).show();
             }
-            jQuery('#productDetail_modal').find('.sel_org_price').html(priceHtml);
-            jQuery('#productDetail_modal').find('.addtocart_moreinfo').html(
-                `<a href="${response.product.product_url}" class="more-info">More info</a><a href="${response.product.add_to_cart}" class="add-to-cart">Add to Cart</a>`
-            );
             jQuery('#productDetail_modal').find('.product_name').html(
                 `<h5>${response.product.product_name}</h5>`);
 
@@ -167,16 +177,26 @@ jQuery("body").on('click', '.relproductModel', function () {
             var priceHtml = '';
             var sellingPrice = parseFloat(response.product.selling_price) || 0;
             var originalPrice = parseFloat(response.product.original_price) || 0;
+            var hasPrice = response.product.has_price;
             
-            if (sellingPrice > 0 && originalPrice > 0 && sellingPrice < originalPrice) {
-                priceHtml = `<div class="selling_price">₹<span>${sellingPrice.toFixed(2)}</span></div><div class="regular_price">₹<del><span>${originalPrice.toFixed(2)}</span></del></div>`;
+            if (hasPrice) {
+                if (sellingPrice > 0 && originalPrice > 0 && sellingPrice < originalPrice) {
+                    priceHtml = `<div class="selling_price">₹<span>${sellingPrice.toFixed(2)}</span></div><div class="regular_price">₹<del><span>${originalPrice.toFixed(2)}</span></del></div>`;
+                } else if (originalPrice > 0) {
+                    priceHtml = `<div class="selling_price">₹<span>${originalPrice.toFixed(2)}</span></div>`;
+                } else if (sellingPrice > 0) {
+                    priceHtml = `<div class="selling_price">₹<span>${sellingPrice.toFixed(2)}</span></div>`;
+                }
+                jQuery('#productDetail_modal').find('.sel_org_price').html(priceHtml).show();
+                jQuery('#productDetail_modal').find('.addtocart_moreinfo').html(
+                    `<a href="${response.product.product_url}" class="more-info">More info</a><a href="${response.product.add_to_cart}" class="add-to-cart">Add to Cart</a>`
+                ).show();
             } else {
-                priceHtml = `<div class="selling_price">₹<span>${originalPrice.toFixed(2)}</span></div>`;
+                jQuery('#productDetail_modal').find('.sel_org_price').html('').hide();
+                jQuery('#productDetail_modal').find('.addtocart_moreinfo').html(
+                    `<a href="${response.product.product_url}" class="more-info">More info</a>`
+                ).show();
             }
-            jQuery('#productDetail_modal').find('.sel_org_price').html(priceHtml);
-            jQuery('#productDetail_modal').find('.addtocart_moreinfo').html(
-                `<a href="${response.product.product_url}" class="more-info">More info</a><a href="${response.product.add_to_cart}" class="add-to-cart">Add to Cart</a>`
-            );
             jQuery('#productDetail_modal').find('.product_name').html(
                 `<h5>${response.product.product_name}</h5>`);
 

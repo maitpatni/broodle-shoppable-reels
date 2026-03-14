@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 2.0
+ * Version: 2.0.1
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -801,13 +801,17 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 					}
 					
 					// Build price display HTML
+					$regular_price = floatval( $regular_price );
+					$sale_price    = floatval( $sale_price );
 					$price_html = '';
 					
-					if (!empty($sale_price) && $sale_price > 0 && $sale_price < $regular_price) {
+					if ( $sale_price > 0 && $regular_price > 0 && $sale_price < $regular_price ) {
 						$price_html = '<div class="selling_price">₹'. number_format($sale_price, 2) .'</div>';
 						$price_html .= '<div class="regular_price">₹<del>'. number_format($regular_price, 2) .'</del></div>';
-					} else {
+					} elseif ( $regular_price > 0 ) {
 						$price_html = '<div class="selling_price">₹'. number_format($regular_price, 2) .'</div>';
+					} else {
+						$price_html = '<div class="selling_price">₹0.00</div>';
 					}
 					
 					$html .= '<div>
@@ -1196,12 +1200,16 @@ if ( ! function_exists( 'broodle_sr_reel_cat_shortcode_func' ) ) {
 					$discountPer = round( ( ( $regular_price - $sale_price ) / $regular_price ) * 100 );
 				}
 
+				$regular_price = floatval( $regular_price );
+				$sale_price    = floatval( $sale_price );
 				$price_html = '';
-				if ( ! empty( $sale_price ) && $sale_price > 0 && $sale_price < $regular_price ) {
+				if ( $sale_price > 0 && $regular_price > 0 && $sale_price < $regular_price ) {
 					$price_html  = '<div class="selling_price">₹' . number_format( $sale_price, 2 ) . '</div>';
 					$price_html .= '<div class="regular_price">₹<del>' . number_format( $regular_price, 2 ) . '</del></div>';
-				} else {
+				} elseif ( $regular_price > 0 ) {
 					$price_html = '<div class="selling_price">₹' . number_format( $regular_price, 2 ) . '</div>';
+				} else {
+					$price_html = '<div class="selling_price">₹0.00</div>';
 				}
 
 				$html .= '<div>

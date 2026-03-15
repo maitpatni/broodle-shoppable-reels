@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 2.0.2
+ * Version: 2.0.3
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -850,273 +850,10 @@ if(!function_exists('broodle_sr_reel_slider_shortcode_func')){
 		endif;
 		wp_reset_postdata();
 		$html .= '</div>';
-		?>
-		<?php 
-			$slider_popup_design = get_option('slider_popup_design');
-			$model_width = '800px';
-			if($slider_popup_design == 'reels_product'){
-				$model_width = '800px';
-			}
-			if($slider_popup_design == 'reels'){
-				$model_width = '350px';
-			}
-			if($slider_popup_design == 'product'){
-				$model_width = '470px';
-			}
-		?>
-		<!-- Modal -->
-		<div class="modal fade" id="productDetail_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-			aria-labelledby="staticBackdropLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg modal-dialog-centered" style="max-width:<?php echo esc_attr($model_width);?>">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close">
-							<span aria-hidden="true">&times;</span>
-						</button>
-					</div>
-					<div class="modal-body p-0">
-						<div class="loader">
-							<div class="load"></div>
-						</div>
-						<div class="productData_modal">
-								<?php 
-									if($slider_popup_design != 'reels_product'){
-										$column = "100%";
-									}else{
-										$column = "";
-									}
-									if($slider_popup_design == 'reels_product' || $slider_popup_design == 'reels'){
-								?>
-										<div class="reel" style="width:<?php echo esc_attr($column);?>">
-										</div>
-								<?php } 
-								if($slider_popup_design == 'reels_product' || $slider_popup_design == 'product'){
-								?>								
-									<div class="productDataSide" style="width:<?php echo esc_attr($column);?>">
-										<div style="padding: 10px 20px;">
-											<div class="product_name">
-											</div>
-											<div class="sel_org_price">
-											</div>
-											<div class="size">
-											</div>
-											<div class="addtocart_moreinfo">
-											</div>
-										</div>
-									</div>
-								</div>
-								<?php } ?>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script type="text/javascript">
-		jQuery(document).ready(function($) {
-			/* ── Smart preloading lazy-loader for reel carousels ──
-			   • On init: loads slide 0, then 1, then 2 sequentially
-			   • On beforeChange: immediately starts loading the NEXT
-			     slide that is about to scroll into view
-			   • Already-loaded slides are never re-loaded
-			   • Far-away slides are unloaded to save memory
-			*/
-			var loadQueue = [];
-			var isLoading = false;
 
-			function unloadVideo(container) {
-				var video = container.find('video');
-				if (video.length) {
-					video.get(0).pause();
-					video.get(0).src = '';
-					video.get(0).load();
-					video.remove();
-				}
-				container.removeClass('video-loaded loaded loading');
-				container.find('.reel-video-placeholder').removeClass('hidden').show();
-			}
+		// Flag that shared modal + lazy-loader must be output in footer
+		broodle_sr_flag_footer_assets();
 
-			function loadVideo(container, callback) {
-				var videoSrc = container.attr('data-video-src');
-				if (!videoSrc || container.hasClass('video-loaded')) {
-					if (callback) callback();
-					return;
-				}
-				container.addClass('video-loaded loading');
-				var video = document.createElement('video');
-				video.setAttribute('autoplay', '');
-				video.setAttribute('muted', '');
-				video.setAttribute('loop', '');
-				video.setAttribute('playsinline', '');
-				video.muted = true;
-				video.volume = 0;
-				video.preload = 'auto';
-
-				var source = document.createElement('source');
-				source.src = videoSrc;
-				source.type = 'video/mp4';
-				video.appendChild(source);
-
-				var done = false;
-				function finish() {
-					if (done) return;
-					done = true;
-					container.addClass('loaded').removeClass('loading');
-					container.find('.reel-video-placeholder').addClass('hidden').hide();
-					video.muted = true;
-					video.volume = 0;
-					var p = video.play();
-					if (p !== undefined) {
-						p.catch(function() { video.style.opacity = '1'; });
-					}
-					if (callback) callback();
-				}
-
-				video.addEventListener('canplay', finish);
-				video.addEventListener('playing', function() {
-					video.muted = true; video.volume = 0; video.style.opacity = '1';
-				});
-				video.addEventListener('error', function() {
-					container.removeClass('loading');
-					container.find('.reel-video-placeholder').hide();
-					done = true;
-					if (callback) callback();
-				});
-				video.addEventListener('volumechange', function() {
-					if (!video.muted || video.volume > 0) { video.muted = true; video.volume = 0; }
-				});
-
-				container.append(video);
-				video.load();
-			}
-
-			function processQueue() {
-				if (isLoading || loadQueue.length === 0) return;
-				isLoading = true;
-				var container = loadQueue.shift();
-				if (!container.length || container.hasClass('loaded')) {
-					isLoading = false;
-					processQueue();
-					return;
-				}
-				loadVideo(container, function() {
-					isLoading = false;
-					processQueue();
-				});
-			}
-
-			/* Enqueue a single slide index if not already loaded */
-			function enqueueSlide(slider, idx) {
-				var slideEl = slider.find('.slick-slide[data-slick-index="' + idx + '"]');
-				if (!slideEl.length) return;
-				var vc = slideEl.find('.reel-video-container[data-lazy="true"]:not(.video-loaded)');
-				if (vc.length) {
-					vc.addClass('loading');
-					/* Avoid duplicates in queue */
-					var dominated = false;
-					for (var q = 0; q < loadQueue.length; q++) {
-						if (loadQueue[q].is(vc)) { dominated = true; break; }
-					}
-					if (!dominated) loadQueue.push(vc);
-				}
-			}
-
-			function getVisibleCount() {
-				return window.innerWidth > 768 ? 3 : 2;
-			}
-
-			/* Unload slides far from current view */
-			function cleanupFarSlides(slider, currentSlide) {
-				var visible = getVisibleCount();
-				var keepFrom = currentSlide - visible;
-				var keepTo = currentSlide + visible * 3;
-				slider.find('.slick-slide:not(.slick-cloned)').each(function() {
-					var idx = parseInt($(this).attr('data-slick-index'), 10);
-					if (isNaN(idx)) return;
-					if (idx < keepFrom || idx > keepTo) {
-						var vc = $(this).find('.reel-video-container.video-loaded');
-						if (vc.length) unloadVideo(vc);
-					}
-				});
-			}
-
-			/* Initial load: enqueue visible slides + next full screen ahead */
-			function initSliderVideos() {
-				$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
-					var slider = $(this);
-					if (!slider.hasClass('slick-initialized')) return;
-					var visible = getVisibleCount();
-					var total = slider.find('.slick-slide:not(.slick-cloned)').length;
-					/* Load visible + one full screen ahead */
-					var loadTo = Math.min(visible * 2, total);
-					for (var i = 0; i < loadTo; i++) {
-						enqueueSlide(slider, i);
-					}
-					processQueue();
-				});
-			}
-
-			/* Poll for slick init then start */
-			var initAttempts = 0;
-			function tryInit() {
-				var anyInit = false;
-				$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
-					if ($(this).hasClass('slick-initialized')) anyInit = true;
-				});
-				if (anyInit || initAttempts > 20) {
-					initSliderVideos();
-				} else {
-					initAttempts++;
-					setTimeout(tryInit, 150);
-				}
-			}
-			tryInit();
-
-			/* BEFORE slide changes — preload the entire next screen of slides */
-			$(document).on('beforeChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide, nextSlide) {
-				var slider = $(this);
-				var visible = getVisibleCount();
-				var total = slider.find('.slick-slide:not(.slick-cloned)').length;
-				/* Always ensure visible + one full screen ahead are loaded */
-				var loadFrom = Math.max(0, nextSlide);
-				var loadTo = Math.min(total, nextSlide + visible + visible);
-				for (var i = loadFrom; i < loadTo; i++) {
-					enqueueSlide(slider, i);
-				}
-				/* Also handle backward scrolling */
-				var loadBack = Math.max(0, nextSlide - 1);
-				enqueueSlide(slider, loadBack);
-				processQueue();
-			});
-
-			/* AFTER slide changes — cleanup far slides */
-			$(document).on('afterChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide) {
-				var slider = $(this);
-				cleanupFarSlides(slider, currentSlide);
-			});
-
-			/* On resize */
-			var resizeTimer;
-			$(window).on('resize', function() {
-				clearTimeout(resizeTimer);
-				resizeTimer = setTimeout(initSliderVideos, 200);
-			});
-
-			/* Fallback for non-slider containers */
-			setTimeout(function() {
-				$('.reel-video-container[data-lazy="true"]:not(.video-loaded)').each(function() {
-					var c = $(this);
-					if (!c.closest('.reelUpSlider, .singlePagereelUpSlider').length ||
-						!c.closest('.reelUpSlider, .singlePagereelUpSlider').hasClass('slick-initialized')) {
-						c.addClass('loading');
-						loadQueue.push(c);
-					}
-				});
-				processQueue();
-			}, 3000);
-		});
-		</script>
-		<?php
 		return $html;
 	}
 	add_shortcode('broodle_reel_slider', 'broodle_sr_reel_slider_shortcode_func');
@@ -1232,9 +969,272 @@ if ( ! function_exists( 'broodle_sr_reel_cat_shortcode_func' ) ) {
 		endif;
 		wp_reset_postdata();
 		$html .= '</div>';
+
+		// Flag that shared modal + lazy-loader must be output in footer
+		broodle_sr_flag_footer_assets();
+
 		return $html;
 	}
 	add_shortcode( 'broodle_reel_category', 'broodle_sr_reel_cat_shortcode_func' );
+}
+
+// ─── Shared flag + footer output for modal & lazy-loader ───
+function broodle_sr_flag_footer_assets() {
+	static $hooked = false;
+	if ( ! $hooked ) {
+		$hooked = true;
+		add_action( 'wp_footer', 'broodle_sr_render_shared_footer', 50 );
+	}
+}
+
+function broodle_sr_render_shared_footer() {
+	$slider_popup_design = get_option('slider_popup_design');
+	$model_width = '800px';
+	if ( $slider_popup_design == 'reels_product' ) {
+		$model_width = '800px';
+	}
+	if ( $slider_popup_design == 'reels' ) {
+		$model_width = '350px';
+	}
+	if ( $slider_popup_design == 'product' ) {
+		$model_width = '470px';
+	}
+	?>
+	<!-- Shoppable Reels Modal -->
+	<div class="modal fade" id="productDetail_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+		aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered" style="max-width:<?php echo esc_attr($model_width);?>">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body p-0">
+					<div class="loader">
+						<div class="load"></div>
+					</div>
+					<div class="productData_modal">
+						<?php
+							if ( $slider_popup_design != 'reels_product' ) {
+								$column = "100%";
+							} else {
+								$column = "";
+							}
+							if ( $slider_popup_design == 'reels_product' || $slider_popup_design == 'reels' ) {
+						?>
+								<div class="reel" style="width:<?php echo esc_attr($column);?>">
+								</div>
+						<?php }
+							if ( $slider_popup_design == 'reels_product' || $slider_popup_design == 'product' ) {
+						?>
+							<div class="productDataSide" style="width:<?php echo esc_attr($column);?>">
+								<div style="padding: 10px 20px;">
+									<div class="product_name">
+									</div>
+									<div class="sel_org_price">
+									</div>
+									<div class="size">
+									</div>
+									<div class="addtocart_moreinfo">
+									</div>
+								</div>
+							</div>
+						</div>
+						<?php } ?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		/* ── Smart preloading lazy-loader for reel carousels ── */
+		var loadQueue = [];
+		var isLoading = false;
+
+		function unloadVideo(container) {
+			var video = container.find('video');
+			if (video.length) {
+				video.get(0).pause();
+				video.get(0).src = '';
+				video.get(0).load();
+				video.remove();
+			}
+			container.removeClass('video-loaded loaded loading');
+			container.find('.reel-video-placeholder').removeClass('hidden').show();
+		}
+
+		function loadVideo(container, callback) {
+			var videoSrc = container.attr('data-video-src');
+			if (!videoSrc || container.hasClass('video-loaded')) {
+				if (callback) callback();
+				return;
+			}
+			container.addClass('video-loaded loading');
+			var video = document.createElement('video');
+			video.setAttribute('autoplay', '');
+			video.setAttribute('muted', '');
+			video.setAttribute('loop', '');
+			video.setAttribute('playsinline', '');
+			video.muted = true;
+			video.volume = 0;
+			video.preload = 'auto';
+
+			var source = document.createElement('source');
+			source.src = videoSrc;
+			source.type = 'video/mp4';
+			video.appendChild(source);
+
+			var done = false;
+			function finish() {
+				if (done) return;
+				done = true;
+				container.addClass('loaded').removeClass('loading');
+				container.find('.reel-video-placeholder').addClass('hidden').hide();
+				video.muted = true;
+				video.volume = 0;
+				var p = video.play();
+				if (p !== undefined) {
+					p.catch(function() { video.style.opacity = '1'; });
+				}
+				if (callback) callback();
+			}
+
+			video.addEventListener('canplay', finish);
+			video.addEventListener('playing', function() {
+				video.muted = true; video.volume = 0; video.style.opacity = '1';
+			});
+			video.addEventListener('error', function() {
+				container.removeClass('loading');
+				container.find('.reel-video-placeholder').hide();
+				done = true;
+				if (callback) callback();
+			});
+			video.addEventListener('volumechange', function() {
+				if (!video.muted || video.volume > 0) { video.muted = true; video.volume = 0; }
+			});
+
+			container.append(video);
+			video.load();
+		}
+
+		function processQueue() {
+			if (isLoading || loadQueue.length === 0) return;
+			isLoading = true;
+			var container = loadQueue.shift();
+			if (!container.length || container.hasClass('loaded')) {
+				isLoading = false;
+				processQueue();
+				return;
+			}
+			loadVideo(container, function() {
+				isLoading = false;
+				processQueue();
+			});
+		}
+
+		function enqueueSlide(slider, idx) {
+			var slideEl = slider.find('.slick-slide[data-slick-index="' + idx + '"]');
+			if (!slideEl.length) return;
+			var vc = slideEl.find('.reel-video-container[data-lazy="true"]:not(.video-loaded)');
+			if (vc.length) {
+				vc.addClass('loading');
+				var dominated = false;
+				for (var q = 0; q < loadQueue.length; q++) {
+					if (loadQueue[q].is(vc)) { dominated = true; break; }
+				}
+				if (!dominated) loadQueue.push(vc);
+			}
+		}
+
+		function getVisibleCount() {
+			return window.innerWidth > 768 ? 3 : 2;
+		}
+
+		function cleanupFarSlides(slider, currentSlide) {
+			var visible = getVisibleCount();
+			var keepFrom = currentSlide - visible;
+			var keepTo = currentSlide + visible * 3;
+			slider.find('.slick-slide:not(.slick-cloned)').each(function() {
+				var idx = parseInt($(this).attr('data-slick-index'), 10);
+				if (isNaN(idx)) return;
+				if (idx < keepFrom || idx > keepTo) {
+					var vc = $(this).find('.reel-video-container.video-loaded');
+					if (vc.length) unloadVideo(vc);
+				}
+			});
+		}
+
+		function initSliderVideos() {
+			$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
+				var slider = $(this);
+				if (!slider.hasClass('slick-initialized')) return;
+				var visible = getVisibleCount();
+				var total = slider.find('.slick-slide:not(.slick-cloned)').length;
+				var loadTo = Math.min(visible * 2, total);
+				for (var i = 0; i < loadTo; i++) {
+					enqueueSlide(slider, i);
+				}
+				processQueue();
+			});
+		}
+
+		var initAttempts = 0;
+		function tryInit() {
+			var anyInit = false;
+			$('.reelUpSlider, .singlePagereelUpSlider').each(function() {
+				if ($(this).hasClass('slick-initialized')) anyInit = true;
+			});
+			if (anyInit || initAttempts > 20) {
+				initSliderVideos();
+			} else {
+				initAttempts++;
+				setTimeout(tryInit, 150);
+			}
+		}
+		tryInit();
+
+		$(document).on('beforeChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide, nextSlide) {
+			var slider = $(this);
+			var visible = getVisibleCount();
+			var total = slider.find('.slick-slide:not(.slick-cloned)').length;
+			var loadFrom = Math.max(0, nextSlide);
+			var loadTo = Math.min(total, nextSlide + visible + visible);
+			for (var i = loadFrom; i < loadTo; i++) {
+				enqueueSlide(slider, i);
+			}
+			var loadBack = Math.max(0, nextSlide - 1);
+			enqueueSlide(slider, loadBack);
+			processQueue();
+		});
+
+		$(document).on('afterChange', '.reelUpSlider, .singlePagereelUpSlider', function(event, slick, currentSlide) {
+			var slider = $(this);
+			cleanupFarSlides(slider, currentSlide);
+		});
+
+		var resizeTimer;
+		$(window).on('resize', function() {
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(initSliderVideos, 200);
+		});
+
+		setTimeout(function() {
+			$('.reel-video-container[data-lazy="true"]:not(.video-loaded)').each(function() {
+				var c = $(this);
+				if (!c.closest('.reelUpSlider, .singlePagereelUpSlider').length ||
+					!c.closest('.reelUpSlider, .singlePagereelUpSlider').hasClass('slick-initialized')) {
+					c.addClass('loading');
+					loadQueue.push(c);
+				}
+			});
+			processQueue();
+		}, 3000);
+	});
+	</script>
+	<?php
 }
 
 if(!function_exists('broodle_sr_create_user_form_ajax')){

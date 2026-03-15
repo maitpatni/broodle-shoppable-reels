@@ -1,7 +1,7 @@
 jQuery("body").on("click", ".toggle-head", function () {
     jQuery(".toggle-body").toggleClass("d-none");
 })
-jQuery("#productDetail_modal .close").on("click", function () {
+jQuery(document).on("click", "#productDetail_modal .close", function () {
     jQuery("#productDetail_modal").modal("hide");
     jQuery('#productDetail_modal').find('.loader').show();
 });
@@ -276,7 +276,7 @@ jQuery(document).ready(function () {
 });
 
 // Pause video when popup is closed
-jQuery('#productDetail_modal').on('hidden.bs.modal', function () {
+jQuery(document).on('hidden.bs.modal', '#productDetail_modal', function () {
     jQuery(this).find('video').each(function() {
         this.pause();
     });

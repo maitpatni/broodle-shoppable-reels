@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -169,7 +169,7 @@ function broodle_sr_enqueue_assets() {
 			'popup-product',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/popup-product.css',
 			array(),
-			'3.3',
+			'3.4',
 			'all'
 		);
 	}
@@ -209,7 +209,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr.css',
 			array(),
-			'3.3',
+			'3.4',
 			'all'
 		);
 	}    
@@ -249,7 +249,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/js/broodle-sr.js',
 			array('jquery'),
-			'1.0',
+			'1.1',
 			true
 		);
 	}
@@ -1006,7 +1006,7 @@ function broodle_sr_render_shared_footer() {
 		<div class="modal-dialog modal-lg modal-dialog-centered" style="max-width:<?php echo esc_attr($model_width);?>">
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close">
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -1350,7 +1350,7 @@ if(!function_exists('broodle_sr_single_product_footer')){
 				<div class="modal-dialog modal-dialog-centered" style="max-width:350px;">
 					<div class="modal-content">
 						<div class="modal-header">
-							<button type="button" class="close">
+							<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>
 						</div>

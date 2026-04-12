@@ -1,9 +1,21 @@
 jQuery("body").on("click", ".toggle-head", function () {
     jQuery(".toggle-body").toggleClass("d-none");
 })
-jQuery(document).on("click", "#productDetail_modal .close", function () {
-    jQuery("#productDetail_modal").modal("hide");
-    jQuery('#productDetail_modal').find('.loader').show();
+jQuery(document).on("click", "#productDetail_modal .close, #productDetail_modal .close *", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var modal = jQuery("#productDetail_modal");
+    // Pause any playing videos first
+    modal.find('video').each(function() { this.pause(); });
+    // Try Bootstrap 5 dismiss
+    var bsModal = bootstrap.Modal.getInstance(modal[0]);
+    if (bsModal) {
+        bsModal.hide();
+    } else {
+        // Fallback: force-hide manually
+        modal.modal("hide");
+    }
+    modal.find('.loader').show();
 });
 jQuery("body").on("click", ".option_item", function () {
     jQuery(".option_item").removeClass("active");

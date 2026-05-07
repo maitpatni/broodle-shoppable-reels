@@ -2,6 +2,57 @@ body {
     background: unset;
 }
 
+/* ─── Theme Override: Ensure modals and video players are not broken by themes ─── */
+#productDetail_modal,
+#VideoModal {
+    z-index: 999999 !important;
+    position: fixed !important;
+}
+
+#productDetail_modal .modal-dialog,
+#VideoModal .modal-dialog {
+    z-index: 1000000 !important;
+}
+
+#productDetail_modal .modal-backdrop,
+#VideoModal .modal-backdrop {
+    z-index: 999998 !important;
+}
+
+.modal-backdrop {
+    z-index: 999998 !important;
+}
+
+/* Prevent themes from hiding or clipping modal content */
+#productDetail_modal .modal-content,
+#VideoModal .modal-content {
+    max-width: none;
+    transform: none;
+    visibility: visible !important;
+}
+
+#productDetail_modal video,
+#VideoModal video,
+.singlePagereelUpSlider video,
+.reelUpSlider video,
+#draggableDiv video {
+    max-width: 100% !important;
+    visibility: visible !important;
+    opacity: 1;
+}
+
+/* Ensure reel video containers are not hidden by theme */
+.reel-video-container,
+.videoDiv.reel-video-container {
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Floating video player z-index override */
+#draggableDiv {
+    z-index: 99999 !important;
+}
+
 .slick-slide {
     width: auto;
     /* Adjust width based on content */

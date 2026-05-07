@@ -105,6 +105,8 @@
 /* ─── Editor Fields ─── */
 .broodle-sr-field {
     margin-bottom: 20px;
+    position: relative;
+    overflow: visible;
 }
 
 .broodle-sr-field:last-child {
@@ -182,7 +184,7 @@
     margin: 20px 0 !important;
     border-radius: 12px !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
-    overflow: hidden;
+    overflow: visible;
     background: #fff;
 }
 
@@ -204,6 +206,7 @@
 #broodle_sr_box_id1 .inside,
 #broodle_sr_box_id2 .inside {
     padding: 20px !important;
+    overflow: visible !important;
 }
 
 /* ─── Product page meta box (simpler) ─── */
@@ -342,6 +345,177 @@
 #adminmenu .menu-icon-broodle_sr_reels:hover .wp-menu-image svg,
 #adminmenu .current .menu-icon-broodle_sr_reels .wp-menu-image img,
 #adminmenu .current .menu-icon-broodle_sr_reels .wp-menu-image svg { opacity: 1; }
+
+/* ─── Searchable Select Dropdown ─── */
+.broodle-sr-searchable-select {
+    position: relative;
+    width: 100%;
+}
+
+/* Ensure postbox doesn't clip our dropdown */
+.post-type-broodle_sr_reels .postbox {
+    overflow: visible !important;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #1e1e1e;
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+    min-height: 40px;
+    user-select: none;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-trigger:hover {
+    border-color: #98a2b3;
+}
+
+.broodle-sr-searchable-select.open .broodle-sr-select-trigger {
+    border-color: #3858e9;
+    box-shadow: 0 0 0 3px rgba(56, 88, 233, 0.12);
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-trigger .broodle-sr-select-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-trigger .broodle-sr-select-text.placeholder {
+    color: #98a2b3;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-trigger .broodle-sr-select-arrow {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23667085' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    transition: transform 0.2s ease;
+}
+
+.broodle-sr-searchable-select.open .broodle-sr-select-trigger .broodle-sr-select-arrow {
+    transform: rotate(180deg);
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+.broodle-sr-searchable-select.open .broodle-sr-select-dropdown {
+    display: block;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-search-wrap {
+    padding: 8px;
+    border-bottom: 1px solid #f2f4f7;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-search {
+    display: block;
+    width: 100%;
+    padding: 8px 10px 8px 32px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #1e1e1e;
+    background: #f9fafb;
+    border: 1px solid #e8eaed;
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2398a2b3'%3e%3cpath fill-rule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clip-rule='evenodd'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: 8px center;
+    background-size: 16px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-search:focus {
+    border-color: #3858e9;
+    background-color: #fff;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-search::placeholder {
+    color: #98a2b3;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-options {
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-options::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-options::-webkit-scrollbar-thumb {
+    background-color: #d0d5dd;
+    border-radius: 3px;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-options::-webkit-scrollbar-thumb:hover {
+    background-color: #98a2b3;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-option {
+    padding: 8px 10px;
+    font-size: 13px;
+    color: #344054;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-option:hover {
+    background: #f0f4ff;
+    color: #3858e9;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-option.selected {
+    background: #eef2ff;
+    color: #3858e9;
+    font-weight: 500;
+}
+
+.broodle-sr-searchable-select .broodle-sr-select-no-results {
+    padding: 16px 10px;
+    font-size: 13px;
+    color: #98a2b3;
+    text-align: center;
+}
 
 /* ─── Responsive ─── */
 @media (max-width: 782px) {

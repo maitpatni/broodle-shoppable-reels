@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 2.0.5
+ * Version: 2.0.6
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -209,7 +209,7 @@ function broodle_sr_enqueue_assets() {
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr.css',
 			array(),
-			'3.4',
+			'3.5',
 			'all'
 		);
 	}    
@@ -238,8 +238,8 @@ function broodle_sr_enqueue_assets() {
 		wp_enqueue_script(
 			'product-single-reel',
 			BROODLE_SR_PLUGIN_URL . 'assets/js/product-single-reel.js',
-			array('jquery'),
-			'1.0',
+			array('jquery', 'bootstrap-min'),
+			'1.1',
 			true
 		);
 	}
@@ -248,8 +248,8 @@ function broodle_sr_enqueue_assets() {
 		wp_enqueue_script(
 			'broodle-sr',
 			BROODLE_SR_PLUGIN_URL . 'assets/js/broodle-sr.js',
-			array('jquery'),
-			'1.1',
+			array('jquery', 'bootstrap-min'),
+			'2.0',
 			true
 		);
 	}
@@ -317,7 +317,7 @@ function broodle_sr_admin_assets() {
 			'broodle-sr-admin',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/broodle-sr-admin.css',
 			array(),
-			'2.0',
+			'2.1',
 			'all'
 		);
 	} 
@@ -327,7 +327,7 @@ function broodle_sr_admin_assets() {
 			'multiselect-dropdown',
 			BROODLE_SR_PLUGIN_URL . 'assets/js/multiselect-dropdown.js',
 			array('jquery'),
-			'1.0',
+			'1.1',
 			true
 		);
 	}
@@ -337,7 +337,7 @@ function broodle_sr_admin_assets() {
 			'broodle-sr-admin',
 			BROODLE_SR_PLUGIN_URL . 'assets/js/broodle-sr-admin.js',
 			array('jquery'),
-			'1.0',
+			'1.1',
 			true
 		);
 	}
@@ -1343,32 +1343,11 @@ if(!function_exists('broodle_sr_single_product_footer')){
 	add_action('wp_footer', 'broodle_sr_single_product_footer');
 	function broodle_sr_single_product_footer() {
 		if (is_product()) {
-			?>
-			<!-- Modal -->
-			<div class="modal fade" id="productDetail_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-				aria-labelledby="staticBackdropLabel" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered" style="max-width:350px;">
-					<div class="modal-content">
-						<div class="modal-header">
-							<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body p-0">
-							<div class="loader">
-								<div class="load"></div>
-							</div>
-							<div class="productData_modal">
-								<div class="reel" style="width:100%;">
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<?php 
-				$right_video = get_post_meta( get_the_ID(),'right_video'); 
-				if($right_video){
+			// Ensure the shared modal + lazy-loader is output (in case no shortcode triggered it)
+			broodle_sr_flag_footer_assets();
+
+			$right_video = get_post_meta( get_the_ID(),'right_video'); 
+			if($right_video){
 			?>
 					<div id="draggableDiv" class="draggable ui-draggable">
 						<div class="content_wrap">
@@ -1400,7 +1379,7 @@ if(!function_exists('broodle_sr_single_product_footer')){
 							</div>
 						</div>
 					</div>			
-					<div class="modal fade" id="VideoModal" tabindex="-1" aria-labelledby="exampleModalLabel" data-backdrop="static" data-keyboard="false" aria-modal="true" role="dialog">
+					<div class="modal fade" id="VideoModal" tabindex="-1" aria-labelledby="exampleModalLabel" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
 						<div class="modal-dialog">
 							<div class="modal-content bg-transparent">								
 								<div class="custom-model-wrap">
@@ -1434,7 +1413,7 @@ if(!function_exists('broodle_sr_single_product_footer')){
 						</div>
 					</div>			
 			<?php
-				}
+			}
 		}
 	}
 }
@@ -1446,6 +1425,8 @@ if($product_page_reels == 1){
 		add_action( 'woocommerce_after_add_to_cart_button', 'broodle_sr_single_post_content' );
 		
 		function broodle_sr_single_post_content() {
+			// Ensure the shared modal + lazy-loader script is output in footer
+			broodle_sr_flag_footer_assets();
 			?>
 				<div class="" style="max-width: 330px;margin:20px 0;">
 					<div class="singlePagereelUpSlider">

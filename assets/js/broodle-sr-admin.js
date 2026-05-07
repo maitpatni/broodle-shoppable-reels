@@ -1,4 +1,143 @@
 jQuery(document).ready(function ($) {
+
+    // ─── Searchable Select Dropdown for Primary Product ───
+    function initSearchableSelect() {
+        var $select = $('select.reelSliderProduct');
+        if (!$select.length) return;
+
+        // Hide original select
+        $select.hide();
+
+        // Build options data from the original select
+        var options = [];
+        $select.find('option').each(function () {
+            options.push({
+                value: $(this).val(),
+                text: $(this).text(),
+                selected: $(this).is(':selected')
+            });
+        });
+
+        // Find currently selected
+        var selectedOption = options.find(function (o) { return o.selected && o.value !== ''; });
+        var displayText = selectedOption ? selectedOption.text : '— Select Product —';
+        var isPlaceholder = !selectedOption;
+
+        // Build the custom dropdown HTML
+        var $wrapper = $('<div class="broodle-sr-searchable-select"></div>');
+        var $trigger = $(
+            '<div class="broodle-sr-select-trigger">' +
+            '<span class="broodle-sr-select-text ' + (isPlaceholder ? 'placeholder' : '') + '">' + escapeHtml(displayText) + '</span>' +
+            '<span class="broodle-sr-select-arrow"></span>' +
+            '</div>'
+        );
+        var $dropdown = $(
+            '<div class="broodle-sr-select-dropdown">' +
+            '<div class="broodle-sr-select-search-wrap">' +
+            '<input type="text" class="broodle-sr-select-search" placeholder="Search products..." autocomplete="off" />' +
+            '</div>' +
+            '<div class="broodle-sr-select-options"></div>' +
+            '</div>'
+        );
+
+        var $optionsList = $dropdown.find('.broodle-sr-select-options');
+
+        // Populate options
+        $.each(options, function (i, opt) {
+            if (opt.value === '') return; // skip placeholder option
+            var selectedClass = opt.selected ? ' selected' : '';
+            var $opt = $('<div class="broodle-sr-select-option' + selectedClass + '" data-value="' + escapeAttr(opt.value) + '">' + escapeHtml(opt.text) + '</div>');
+            $optionsList.append($opt);
+        });
+
+        $wrapper.append($trigger).append($dropdown);
+        $select.after($wrapper);
+
+        // Toggle dropdown
+        $trigger.on('click', function (e) {
+            e.stopPropagation();
+            var isOpen = $wrapper.hasClass('open');
+            // Close all other open dropdowns
+            $('.broodle-sr-searchable-select.open').removeClass('open');
+            if (!isOpen) {
+                $wrapper.addClass('open');
+                $dropdown.find('.broodle-sr-select-search').val('').trigger('input').focus();
+            }
+        });
+
+        // Search filtering
+        $dropdown.find('.broodle-sr-select-search').on('input', function () {
+            var query = $(this).val().toLowerCase();
+            var hasVisible = false;
+            $optionsList.find('.broodle-sr-select-option').each(function () {
+                var text = $(this).text().toLowerCase();
+                if (text.indexOf(query) > -1) {
+                    $(this).show();
+                    hasVisible = true;
+                } else {
+                    $(this).hide();
+                }
+            });
+            // Show/hide no results message
+            $optionsList.find('.broodle-sr-select-no-results').remove();
+            if (!hasVisible) {
+                $optionsList.append('<div class="broodle-sr-select-no-results">No products found</div>');
+            }
+        });
+
+        // Prevent search input click from closing
+        $dropdown.find('.broodle-sr-select-search').on('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Select an option
+        $optionsList.on('click', '.broodle-sr-select-option', function (e) {
+            e.stopPropagation();
+            var val = String($(this).attr('data-value'));
+            var text = $(this).text();
+
+            // Update original select
+            $select.val(val).trigger('change');
+
+            // Update UI
+            $optionsList.find('.broodle-sr-select-option').removeClass('selected');
+            $(this).addClass('selected');
+            $trigger.find('.broodle-sr-select-text').text(text).removeClass('placeholder');
+
+            // Close dropdown
+            $wrapper.removeClass('open');
+        });
+
+        // Close on outside click
+        $(document).on('click', function (e) {
+            if (!$wrapper[0].contains(e.target)) {
+                $wrapper.removeClass('open');
+            }
+        });
+
+        // Close on Escape key
+        $(document).on('keydown', function (e) {
+            if (e.key === 'Escape') {
+                $wrapper.removeClass('open');
+            }
+        });
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function escapeAttr(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Initialize the searchable select
+    initSearchableSelect();
+
+    // ─── End Searchable Select ───
+
     // Function to open WordPress Media Uploader
     function openMediaUploader(callback) {
         var mediaUploader = wp.media({

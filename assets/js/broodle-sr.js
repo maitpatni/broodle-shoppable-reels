@@ -15,7 +15,7 @@
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
             var instance = bootstrap.Modal.getInstance(el);
             if (!instance) {
-                instance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
+                instance = new bootstrap.Modal(el, { backdrop: 'static', keyboard: true });
             }
             instance.show();
             return instance;
@@ -61,6 +61,18 @@
         modal.find('video').each(function() { this.pause(); });
         hideModal('#productDetail_modal');
         modal.find('.loader').show();
+    });
+
+    // ─── Escape key fallback (for when Bootstrap is not available) ───
+    $(document).on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var modal = $('#productDetail_modal');
+            if (modal.hasClass('show')) {
+                modal.find('video').each(function() { this.pause(); });
+                hideModal('#productDetail_modal');
+                modal.find('.loader').show();
+            }
+        }
     });
 
     // ─── Size Option Selection ───

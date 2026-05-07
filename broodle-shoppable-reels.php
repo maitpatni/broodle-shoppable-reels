@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 2.0.7
+ * Version: 2.0.8
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -1001,7 +1001,7 @@ function broodle_sr_render_shared_footer() {
 	}
 	?>
 	<!-- Shoppable Reels Modal -->
-	<div class="modal fade" id="productDetail_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+	<div class="modal fade" id="productDetail_modal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1"
 		aria-labelledby="staticBackdropLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg modal-dialog-centered" style="max-width:<?php echo esc_attr($model_width);?>">
 			<div class="modal-content">
@@ -1386,13 +1386,13 @@ if(!function_exists('broodle_sr_single_product_footer')){
 							</div>
 						</div>
 					</div>			
-					<div class="modal fade" id="VideoModal" tabindex="-1" aria-labelledby="exampleModalLabel" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+					<div class="modal fade" id="VideoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 						<div class="modal-dialog">
 							<div class="modal-content bg-transparent">								
 								<div class="custom-model-wrap">
 									<div class="pop-up-content-wrap">
 										<div class="popup-video active">
-											<video playsinline="playsinline" autoplay="autoplay" loop="loop" class="video popup_video" preload="metadata">
+											<video playsinline="playsinline" loop="loop" muted="muted" class="video popup_video" preload="metadata">
 												<source src="<?php echo esc_url($right_video);?>" type="video/mp4">
 											</video>
 											<div class="popup-video-controls">

@@ -1,106 +1,170 @@
+/* ─── Floating Video Player on Product Page ─── */
 #draggableDiv {
     position: fixed;
     bottom: 100px;
     right: 10px;
-    z-index: 99;
-}
-.content_wrap {
-    position: relative;
-    max-width: 300px;
-    width: 100%;
-    border-radius: 10px;
-}
-#pdp_video {
-    border-radius: 15px;
-    position: relative;
+    z-index: 99999;
 }
 
-.video {
-    border-radius: 15px;
-    object-fit: cover;
-    z-index: 2;
-    cursor: pointer;
+#draggableDiv .content_wrap {
     position: relative;
+    width: 200px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    background: #000;
 }
-.ui-draggable-handle {
-    -ms-touch-action: none;
-    touch-action: none;
+
+#draggableDiv .videoBox {
+    width: 200px;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    cursor: pointer;
 }
-.controls {
+
+#draggableDiv .videoBox video,
+#draggableDiv #pdp_video {
+    width: 200px !important;
+    height: 300px !important;
+    object-fit: cover;
+    border-radius: 15px;
+    display: block;
+    position: relative;
+    z-index: 2;
+}
+
+#draggableDiv .controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+#draggableDiv .controls button {
+    pointer-events: auto;
+}
+
+#draggableDiv .pause_play {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    z-index: 11;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+#draggableDiv .pause_play .icon {
+    width: 14px;
+    height: 14px;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.pause_play {
-    position: absolute;
-    bottom: 60px;
-    background: transparent;
-    left: 15px;
-    outline: none;
-    z-index: 99999;
-    border: none;
+
+#draggableDiv .pause_play .icon svg {
+    width: 100%;
+    height: 100%;
 }
-.video-close {
+
+#draggableDiv .pause_play .icon.hide {
+    display: none;
+}
+
+#draggableDiv .video-close {
     position: absolute;
     top: 10px;
-    background: transparent;
-    right: 20px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     outline: none;
-    z-index: 99999;
+    z-index: 11;
     border: none;
-    width: 40px;
-    height: 40px;
     cursor: pointer;
+    padding: 0;
+}
 
+#draggableDiv .video-close svg {
+    width: 16px;
+    height: 16px;
 }
-.pause_play .icon{
-    position: absolute;
-    width: 25px;
-    height: 25px;
-    top: 0;
-    left: 0;
+
+/* ─── Video Modal (Full Screen Popup) ─── */
+#VideoModal {
+    z-index: 999999 !important;
+    background: rgba(0, 0, 0, 0.85);
 }
-.pause_play .icon.hide{
-    visibility: hidden;
+
+#VideoModal .modal-dialog {
+    max-width: 500px;
+    margin: 50px auto;
 }
-#VideoModal .modal-content{
-    margin-top: 55px;
+
+#VideoModal .modal-content {
     border: none;
+    background: transparent;
+    border-radius: 15px;
+    overflow: visible;
 }
-/* #VideoModal .close-btn {
-    position: absolute;
-    right: -50px;
-    top: -20px;
-    cursor: pointer;
-    z-index: 99;
-    font-size: 60px;
-    color: #fff;
-    width: 50px;
-} */
 
+#VideoModal .custom-model-wrap {
+    display: block;
+    width: 100%;
+    position: relative;
+    box-sizing: border-box;
+    max-height: calc(100vh - 100px);
+    overflow: visible;
+    padding: 0;
+}
+
+#VideoModal .popup-video {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+#VideoModal .popup_video {
+    width: 100%;
+    max-height: calc(100vh - 100px);
+    object-fit: cover;
+    display: block;
+    border-radius: 15px;
+    z-index: 2;
+}
 
 #VideoModal .popup-video-controls {
     position: absolute;
     display: flex;
     width: 100%;
-    background: linear-gradient(rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 100%);
-    top: 0px;
-    padding: 10px;
-    max-width: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+    top: 0;
+    padding: 12px;
     align-items: center;
     justify-content: space-between;
-    z-index: 11111111;
-    border-radius: 15px;
+    z-index: 10;
+    border-radius: 15px 15px 0 0;
 }
 
-#VideoModal .popup_video {
-    max-height: calc(100vh - 100px);
-    z-index: 9999;
-    height: 100%;
-    width: 500px;
-}
-
-#VideoModal .controls {
+#VideoModal .popup-video-controls .controls {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -109,93 +173,87 @@
 
 #VideoModal .popup-video-controls button {
     position: relative;
-    background: transparent;
-    width: 50px;
+    background: rgba(0, 0, 0, 0.4);
+    width: 40px;
+    height: 40px;
     border: none;
     outline: none;
-    height: 50px;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
 }
 
-#VideoModal .custom-model-wrap {
-    display: block;
-    width: 100%;
-    position: relative;
-    padding: 20px;
-    box-sizing: border-box;
-    max-height: calc(100vh - 50px);
-    overflow-y: inherit;
-    padding: 0;
+#VideoModal .popup-video-controls button svg {
+    width: 24px;
+    height: 24px;
 }
 
 #VideoModal button.volume_btn.muted::before {
     content: "";
     position: absolute;
-    top: 25%;
-    left: 65%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
-    width: 65%;
+    width: 60%;
     height: 2.5px;
     border-radius: 10px;
     background-color: #fff;
-    transform-origin: 0 0;
 }
 
+#VideoModal .bg-overlay {
+    display: none;
+}
 
-/*reel slider*/
-/* .singlePagereelUpSlider .slick-slide {
-    padding:10px;
-    position: relative;
-    height: unset !important;
-} */
-/* .singlePagereelUpSlider .slide_product_image{
-    height: 45px;
-    width: 60px;
-    position: absolute;
-    bottom: -15px;
-    left: 15px;
-    box-shadow: 0 0 14px 4px #80808024;
-    border-radius: 10px;
+#VideoModal .paused_icon {
+    display: none;
+}
 
-} */
-.singlePagereelUpSlider .reel_product_image video{
+/* ─── Single Product Page Reel Slider ─── */
+.singlePagereelUpSlider .reel_product_image video {
     border-radius: 10px;
 }
-.singlePagereelUpSlider .slide_product_image img{
+
+.singlePagereelUpSlider .slide_product_image img {
     border-radius: 10px;
     max-width: 100%;
     height: auto;
 }
-.singlePagereelUpSlider .reel_product_image{
+
+.singlePagereelUpSlider .reel_product_image {
     position: relative;
 }
-.singlePagereelUpSlider .product_name h5{
+
+.singlePagereelUpSlider .product_name h5 {
     color: rgb(15, 15, 15);
     font-weight: 600;
     font-size: 15px;
     font-family: inherit;
     margin: 18px 0 5px;
 }
-.singlePagereelUpSlider .sel_org_price{
+
+.singlePagereelUpSlider .sel_org_price {
     font-size: 14px;
     line-height: 1;
     font-weight: 500;
-    display:flex;
-    gap:10px;
+    display: flex;
+    gap: 10px;
     margin: 10px 0;
     font-weight: 600;
     font-family: inherit;
 }
-.singlePagereelUpSlider .sel_org_price .selling_price{
+
+.singlePagereelUpSlider .sel_org_price .selling_price {
     color: #b30000;
 }
-.singlePagereelUpSlider .sel_org_price .regular_price{
+
+.singlePagereelUpSlider .sel_org_price .regular_price {
     color: gray;
 }
-/* .singlePagereelUpSlider .reel_product{
-    box-shadow: 0px 0px 10px #00000026;cursor: pointer;border-radius: 10px;
-} */
-.singlePagereelUpSlider .reel_product .off_views,.slider_productDetail .off_views {
+
+.singlePagereelUpSlider .reel_product .off_views,
+.slider_productDetail .off_views {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -204,7 +262,9 @@
     width: 100%;
     top: 10px;
 }
-.singlePagereelUpSlider .off_views .off,.slider_productDetail .off_views .off{
+
+.singlePagereelUpSlider .off_views .off,
+.slider_productDetail .off_views .off {
     background: #B30000;
     padding: 2px 7px;
     font-size: 10px;
@@ -214,7 +274,9 @@
     border-radius: 5px 0px 0px 5px;
     z-index: 1;
 }
-.singlePagereelUpSlider .off_views .off::after,.slider_productDetail .off_views .off::after{
+
+.singlePagereelUpSlider .off_views .off::after,
+.slider_productDetail .off_views .off::after {
     content: '';
     height: 13px;
     width: 13px;
@@ -225,26 +287,62 @@
     transform: rotate(45deg);
     z-index: -1;
 }
-.singlePagereelUpSlider .off_views .view,.slider_productDetail .off_views .view{
+
+.singlePagereelUpSlider .off_views .view,
+.slider_productDetail .off_views .view {
     background: #0000004d;
     padding: 1px 7px;
     font-size: 11px;
     color: #fff;
     border-radius: 5px;
 }
-.singlePagereelUpSlider button.slick-prev.slick-arrow{
+
+.singlePagereelUpSlider button.slick-prev.slick-arrow {
     z-index: 100;
     left: 20px !important;
     top: 50% !important;
 }
-.singlePagereelUpSlider button.slick-next.slick-arrow{
-    right: 40px !important  ;
+
+.singlePagereelUpSlider button.slick-next.slick-arrow {
+    right: 40px !important;
     z-index: 100;
-    top: 50% !important; 
+    top: 50% !important;
 }
-.singlePagereelUpSlider button.slick-arrow:before{
+
+.singlePagereelUpSlider button.slick-arrow:before {
     font-size: 40px;
 }
-.singlePagereelUpSlider .videoDiv{
+
+.singlePagereelUpSlider .videoDiv {
     text-align: center;
+}
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 768px) {
+    #draggableDiv .content_wrap,
+    #draggableDiv .videoBox,
+    #draggableDiv .videoBox video,
+    #draggableDiv #pdp_video {
+        width: 140px !important;
+        height: 210px !important;
+    }
+
+    #VideoModal .modal-dialog {
+        margin: 0;
+        max-width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #VideoModal .popup_video {
+        max-height: 85vh;
+        width: 100vw;
+        border-radius: 0;
+    }
+
+    #VideoModal .popup-video {
+        border-radius: 0;
+    }
 }

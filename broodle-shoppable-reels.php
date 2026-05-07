@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Broodle Shoppable Reels
  * Description: Add interactive, shoppable videos and reels to your WordPress site, allowing users to shop directly from your engaging content for a seamless shopping experience.
- * Version: 2.0.6
+ * Version: 2.0.7
  * Author: Broodle
  * Author URI: https://broodle.one/marketplace
  * Text Domain: broodle-shoppable-reels
@@ -199,7 +199,7 @@ function broodle_sr_enqueue_assets() {
 			'product-single-reel',
 			BROODLE_SR_PLUGIN_URL . 'assets/css/product-single-reel.css',
 			array(),
-			'1.0',
+			'2.0',
 			'all'
 		);
 	}
@@ -1335,6 +1335,7 @@ if(!function_exists('broodle_sr_create_user_form_ajax')){
 			}
 		}
 		$data['related_product'] = $related_product_arr;
+		$data['show_related'] = (bool) get_option('related_product', 1);
 		wp_send_json($data);
 	} 	
 }
@@ -1346,14 +1347,20 @@ if(!function_exists('broodle_sr_single_product_footer')){
 			// Ensure the shared modal + lazy-loader is output (in case no shortcode triggered it)
 			broodle_sr_flag_footer_assets();
 
-			$right_video = get_post_meta( get_the_ID(),'right_video'); 
-			if($right_video){
+			// Only show floating video if the setting is enabled
+			$product_page_video = get_option('product_page_video', 1);
+			if ( ! $product_page_video ) {
+				return;
+			}
+
+			$right_video = get_post_meta( get_the_ID(),'right_video', true); 
+			if( ! empty( $right_video ) ){
 			?>
 					<div id="draggableDiv" class="draggable ui-draggable">
 						<div class="content_wrap">
 							<div class="videoBox">
 								<video playsinline="playsinline" autoplay="autoplay" loop="loop" muted="muted" class="video ui-draggable-handle" width="200px" height="300px" id="pdp_video" preload="metadata" poster="">
-									<source src="<?php echo esc_attr($right_video[0]);?>" type="video/mp4">								
+									<source src="<?php echo esc_url($right_video);?>" type="video/mp4">								
 								</video>
 							</div>
 							<div class="controls">
@@ -1386,7 +1393,7 @@ if(!function_exists('broodle_sr_single_product_footer')){
 									<div class="pop-up-content-wrap">
 										<div class="popup-video active">
 											<video playsinline="playsinline" autoplay="autoplay" loop="loop" class="video popup_video" preload="metadata">
-												<source src="<?php echo esc_attr($right_video[0]);?>" type="video/mp4">
+												<source src="<?php echo esc_url($right_video);?>" type="video/mp4">
 											</video>
 											<div class="popup-video-controls">
 												<div class="controls">
@@ -1555,17 +1562,33 @@ if ( ! function_exists( 'broodle_sr_settings_page' ) ) {
 						</td>
 			        </tr>	
 			        <tr valign="top">
-						<th scope="row">Related Product</th>
-						<td class="checkbox">
-							<input type="checkbox" name="related_product" id="related_product" class="related_product" value="1" <?php checked($related_product, 1); ?>/>
-							<label for="related_product">Hide/Show</label>
+						<th scope="row">Related Products in Popup</th>
+						<td>
+							<select name="related_product" id="related_product">
+								<option value="1" <?php selected($related_product, 1); ?>>Yes — Show related products</option>
+								<option value="0" <?php selected($related_product, 0); ?>>No — Hide related products</option>
+							</select>
+							<p class="description">Show or hide related products inside the reel popup modal.</p>
 						</td>
 			        </tr>
 					<tr valign="top">
-						<th scope="row">Single Product Page Reels</th>
-						<td class="checkbox">
-							<input type="checkbox" name="product_page_reels" id="product_page_reels" class="product_page_reels" value="1"  <?php checked($product_page_reels, 1); ?>/>
-							<label for="product_page_reels">Hide/Show</label>
+						<th scope="row">Reel Slider on Product Page</th>
+						<td>
+							<select name="product_page_reels" id="product_page_reels">
+								<option value="1" <?php selected($product_page_reels, 1); ?>>Yes — Show reel slider</option>
+								<option value="0" <?php selected($product_page_reels, 0); ?>>No — Hide reel slider</option>
+							</select>
+							<p class="description">Show or hide the reel video slider on single product pages.</p>
+						</td>
+			        </tr>
+					<tr valign="top">
+						<th scope="row">Floating Video on Product Page</th>
+						<td>
+							<select name="product_page_video" id="product_page_video">
+								<option value="1" <?php selected($product_page_video, 1); ?>>Yes — Show floating video</option>
+								<option value="0" <?php selected($product_page_video, 0); ?>>No — Hide floating video</option>
+							</select>
+							<p class="description">Show or hide the floating video player (bottom-right corner) on single product pages.</p>
 						</td>
 			        </tr>
 					<tr valign="top">

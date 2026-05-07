@@ -34,11 +34,9 @@ body {
 #productDetail_modal video,
 #VideoModal video,
 .singlePagereelUpSlider video,
-.reelUpSlider video,
-#draggableDiv video {
+.reelUpSlider video {
     max-width: 100% !important;
     visibility: visible !important;
-    opacity: 1;
 }
 
 /* Ensure reel video containers are not hidden by theme */
@@ -51,6 +49,10 @@ body {
 /* Floating video player z-index override */
 #draggableDiv {
     z-index: 99999 !important;
+}
+
+#draggableDiv video {
+    display: block !important;
 }
 
 .slick-slide {
